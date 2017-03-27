@@ -105,7 +105,7 @@ public class SRPGView extends SurfaceView
     public void run() {
         while (thread != null) {
             SCENE = NEXT_SCENE;
-            if (SCENE == OP) {
+            if (SCENE == OP) {//todo:OP画像の表示及びBGMの実装
                 lock();
                 canvas.drawColor(Color.WHITE);
                 Paint paint = new Paint();
@@ -130,7 +130,7 @@ public class SRPGView extends SurfaceView
                 sleep(0);
 
             }
-            if (SCENE == MAP) {
+            if (SCENE == MAP) {//todo:マップの読み込み、マップ定数の設定、及び描画の実装　ゴール地点設定
                 lock();
                 canvas.drawColor(Color.WHITE);
                 Paint paint = new Paint();
@@ -142,7 +142,7 @@ public class SRPGView extends SurfaceView
                 SCENE = MOVE_READY;
 
             }
-            if (SCENE == MOVE_READY) {
+            if (SCENE == MOVE_READY) {// todo:移動可能領域の取得、及び領域の描画の実装　
                 lock();
                 canvas.drawColor(Color.WHITE);
                 Paint paint = new Paint();
@@ -172,7 +172,7 @@ public class SRPGView extends SurfaceView
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         return true;
-    }
+    }//todo:タッチ待ち受け　タッチによるキャラクターの移動の実装
 }
 
 
