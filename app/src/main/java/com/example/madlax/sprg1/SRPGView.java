@@ -12,8 +12,6 @@ import android.graphics.Paint;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
-import java.util.Map;
-
 /**
  * Created by madlax on 2017/03/27.
  */
@@ -24,8 +22,8 @@ public class SRPGView extends SurfaceView
     int w;//画面横幅
     int h;//画面縦幅
     int cell;//セルサイズ
-    int n = 24;//セル数横
-    int m = 32;//セル数縦
+    int n = 6;//セル数横
+    int m = 8;//セル数縦
     int originX;//座標原点X
     int originY;//座標原点Y
     Rect[][] Map_data = new Rect[n][m];;//描画領域
@@ -37,32 +35,38 @@ public class SRPGView extends SurfaceView
     //SceneConstant
     int SCENE = -1;
     int NEXT_SCENE = -1;
-    int OP = 0;
-    int MAP = 1;
-    int MOVE_READY = 2;
-    int BATTLE = 3;
-    int GAMEOVER = 9;
+    static int OP = 0;
+    static int MAP = 1;
+    static int MOVE_READY = 2;
+    static int BATTLE = 3;
+    static int GAMEOVER = 9;
 
 
-    //user defined method
+    //user defined method //todo:タッチ入力待ち受け関数の実装 画像読み込み関数の実装
     public void lock(){
         canvas = holder.lockCanvas();
-    }
+    }//surface lock
     public void unlock(){
         holder.unlockCanvasAndPost(canvas);
-    }
-    public void sleep(int time){
+    }//sruface unlock
+    public void sleep(int time){//delay method
         try {
             Thread.sleep(time);
         }catch(Exception e){
         }
     }
-
+    public void generateMapDomain(int n,int m,int originX,int originY,int cell){
+        for(int i=0;i<n;i++) {
+            for (int j = 0; j < m; j++) {
+                Map_data[i][j] = new Rect(originX + i * cell, originY + j * cell, originX + (1 + i) * cell, originY + (1 + j) * cell);
+            }
+        }
+    }
 
     //Constructor
     public SRPGView(Context context) {
         super(context);
-        //generate surfeceholder
+        //generate surface holder
         holder = getHolder();
         holder.addCallback(this);
         //get screen size and get origin,cell
@@ -71,19 +75,11 @@ public class SRPGView extends SurfaceView
         display.getSize(p);
         w = p.x;
         h = p.y;
-        cell = Math.min(w/n,h/m);
+        cell = Math.min(w/n,h/m)-20;
         originX = (w-n*cell)/2;
         originY = (h-m*cell)/2;
         //initialize Map_data
-        for(int i=0;i<n;i++){
-            for(int j=0;j<m;j++){
-                Map_data[i][j] = new Rect(originX+i*cell,originY+j*cell,originX+(1+i)*cell,originY+(1+j)*cell);
-            }
-        }
-
-
-
-
+        generateMapDomain(n,m,originX,originY,cell);
         //scene constant
         NEXT_SCENE = 0;
     }
@@ -125,12 +121,11 @@ public class SRPGView extends SurfaceView
                         canvas.drawRect(Map_data[i][j],paint2);
                     }
                 }
-
                 unlock();
                 sleep(0);
 
             }
-            if (SCENE == MAP) {//todo:マップの読み込み、マップ定数の設定、及び描画の実装　ゴール地点設定
+            if (SCENE == MAP) {//todo:マップの読み込み、マップ定数の設定、及び描画の実装　ゴール地点設定 キャラクター描画
                 lock();
                 canvas.drawColor(Color.WHITE);
                 Paint paint = new Paint();
@@ -138,8 +133,7 @@ public class SRPGView extends SurfaceView
                 paint.setTextSize(48);
                 canvas.drawText("MAP",60,50,paint);
                 unlock();
-                sleep(0);
-                SCENE = MOVE_READY;
+                sleep(600);
 
             }
             if (SCENE == MOVE_READY) {// todo:移動可能領域の取得、及び領域の描画の実装　
@@ -151,7 +145,6 @@ public class SRPGView extends SurfaceView
                 canvas.drawText("MOVE_READY",70,50,paint);
                 unlock();
                 sleep(0);
-                SCENE = GAMEOVER;
             }
             if (SCENE == GAMEOVER) {
                 lock();
@@ -171,6 +164,59 @@ public class SRPGView extends SurfaceView
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if(SCENE == OP){
+            switch ( event.getAction() ) {
+
+                case MotionEvent.ACTION_DOWN:
+                    //画面がタッチされたときの動作
+                    NEXT_SCENE = MAP;
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    //タッチしたまま移動したときの動作
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    //タッチが離されたときの動作
+                    break;
+
+                case MotionEvent.ACTION_CANCEL:
+                    //他の要因によってタッチがキャンセルされたときの動作
+                    break;
+
+            }
+
+        }
+        else if(SCENE == MAP){
+            switch ( event.getAction() ) {
+
+                case MotionEvent.ACTION_DOWN:
+                    //画面がタッチされたときの動作
+                    if(1==1){//todo:ifタッチ箇所==キャラクター
+                        NEXT_SCENE = MOVE_READY;
+                    }
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    //タッチしたまま移動したときの動作
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    //タッチが離されたときの動作
+                    break;
+
+                case MotionEvent.ACTION_CANCEL:
+                    //他の要因によってタッチがキャンセルされたときの動作
+                    break;
+
+            }
+
+        }
+        else if(SCENE == MOVE_READY){
+            if(1==1){//todo:ifタッチ箇所が移動可能領域
+                    //todo:キャラクター座標の変更の実装
+            }
+        }
         return true;
     }//todo:タッチ待ち受け　タッチによるキャラクターの移動の実装
 }
