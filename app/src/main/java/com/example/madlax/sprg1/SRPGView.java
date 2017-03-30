@@ -3,6 +3,7 @@ package com.example.madlax.sprg1;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.text.method.Touch;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Display;
@@ -37,7 +38,6 @@ public class SRPGView extends SurfaceView
     //SystemConstant
     public SurfaceHolder holder;
     public Thread thread;
-    public Paint paint;
     public Canvas canvas;
     //SceneConstant
     int SCENE = -1;
@@ -48,6 +48,7 @@ public class SRPGView extends SurfaceView
     static int BATTLE = 3;
     static int GAMEOVER = 9;
     //CharactorConstant
+    int Reachable = 4;
 
 
 
@@ -153,6 +154,9 @@ public class SRPGView extends SurfaceView
                 paint.setColor(Color.BLUE);
                 paint.setTextSize(48);
                 canvas.drawText("MAP",60,50,paint);
+                Paint paint1 = new Paint();
+                paint1.setTextSize(48);
+                canvas.drawText("Touch:"+Touch_Coordinate[0]+","+Touch_Coordinate[1]+"Chara:"+Chara_Coordinate[0]+","+Chara_Coordinate[1],60,100,paint1);
                 unlock();
                 sleep(600);
 
@@ -164,6 +168,9 @@ public class SRPGView extends SurfaceView
                 paint.setColor(Color.BLUE);
                 paint.setTextSize(48);
                 canvas.drawText("MOVE_READY",70,50,paint);
+                Paint paint1 = new Paint();
+                paint1.setTextSize(48);
+                canvas.drawText("Touch:"+Touch_Coordinate[0]+","+Touch_Coordinate[1]+"Chara:"+Chara_Coordinate[0]+","+Chara_Coordinate[1],60,100,paint1);
                 unlock();
                 sleep(0);
             }
@@ -220,7 +227,7 @@ public class SRPGView extends SurfaceView
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
-                    if(1==1){//todo:ifタッチ箇所==キャラクター
+                    if(Chara_Touch_Distance == 0){//todo:ifタッチ箇所==キャラクター
                         NEXT_SCENE = MOVE_READY;
                     }
                     break;
@@ -245,11 +252,15 @@ public class SRPGView extends SurfaceView
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
-                    if (1 == 1) {//todo:ifタッチ箇所==キャラクター
-                        NEXT_SCENE = OP;
+                    if (Chara_Touch_Distance <= Reachable) {//todo:ifタッチ箇所==キャラクター
+                        Chara_Coordinate[0] = Touch_Coordinate[0];
+                        Chara_Coordinate[1] = Touch_Coordinate[1];
+                        NEXT_SCENE = MAP;
+                    }
+                    if (Chara_Touch_Distance > Reachable){
+                        NEXT_SCENE = MAP;
                     }
                     break;
-
                 case MotionEvent.ACTION_MOVE:
                     //タッチしたまま移動したときの動作
                     break;
