@@ -11,6 +11,8 @@ import android.view.MotionEvent;
 import android.graphics.Paint;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.util.Log;
+import android.text.TextPaint;
 
 /**
  * Created by madlax on 2017/03/27.
@@ -26,6 +28,11 @@ public class SRPGView extends SurfaceView
     int m = 8;//セル数縦
     int originX;//座標原点X
     int originY;//座標原点Y
+    float touchX;//タッチ座標
+    float touchY;//タッチ座標
+    int Touch_Coordinate[] = new int[2];
+    int Chara_Coordinate[] = new int[2];
+    int Chara_Touch_Distance;
     Rect[][] Map_data = new Rect[n][m];;//描画領域
     //SystemConstant
     public SurfaceHolder holder;
@@ -40,6 +47,8 @@ public class SRPGView extends SurfaceView
     static int MOVE_READY = 2;
     static int BATTLE = 3;
     static int GAMEOVER = 9;
+    //CharactorConstant
+
 
 
     //user defined method //todo:タッチ入力待ち受け関数の実装 画像読み込み関数の実装
@@ -80,6 +89,11 @@ public class SRPGView extends SurfaceView
         originY = (h-m*cell)/2;
         //initialize Map_data
         generateMapDomain(n,m,originX,originY,cell);
+        //initialize each array
+        Touch_Coordinate[0] = 0;
+        Touch_Coordinate[1] = 0;
+        Chara_Coordinate[0] = 0;
+        Chara_Coordinate[1] = 0;
         //scene constant
         NEXT_SCENE = 0;
     }
@@ -112,15 +126,22 @@ public class SRPGView extends SurfaceView
                 paint1.setColor(Color.BLUE);
                 paint1.setTextSize(48);
                 canvas.drawText("Mapdata origin:"+Map_data[0][0].left+","+Map_data[0][0].top,50,100,paint1);
-
                 Paint paint2 = new Paint();
-                paint2.setColor(Color.RED);
-                paint2.setStyle(Paint.Style.STROKE);
+                paint2.setColor(Color.BLUE);
+                paint2.setTextSize(48);
+                canvas.drawText("touchX:"+(int)touchX+"touchY:"+(int)touchY,50,150,paint);
+                Paint paint3 = new Paint();
+                paint3.setColor(Color.RED);
+                paint3.setStyle(Paint.Style.STROKE);
                 for(int i=0;i<n;i++){
                     for(int j=0;j<m;j++){
-                        canvas.drawRect(Map_data[i][j],paint2);
+                        canvas.drawRect(Map_data[i][j],paint3);
                     }
                 }
+                Paint paint4 = new Paint();
+                paint2.setColor(Color.BLUE);
+                paint2.setTextSize(48);
+                canvas.drawText("cellX:"+Touch_Coordinate[0]+"cellY:"+Touch_Coordinate[1],50,200,paint);
                 unlock();
                 sleep(0);
 
@@ -164,11 +185,18 @@ public class SRPGView extends SurfaceView
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        touchX = event.getX();
+        touchY = event.getY();
+        Touch_Coordinate[0] = ((int)touchX-originX)/cell;
+        Touch_Coordinate[1] = ((int)touchY-originY)/cell;
+        Chara_Touch_Distance = Math.abs(Touch_Coordinate[0]-Chara_Coordinate[0])+Math.abs(Touch_Coordinate[1]-Chara_Coordinate[1]);
+
         if(SCENE == OP){
             switch ( event.getAction() ) {
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
+
                     NEXT_SCENE = MAP;
                     break;
 
@@ -212,9 +240,28 @@ public class SRPGView extends SurfaceView
             }
 
         }
-        else if(SCENE == MOVE_READY){
-            if(1==1){//todo:ifタッチ箇所が移動可能領域
-                    //todo:キャラクター座標の変更の実装
+        else if(SCENE == MOVE_READY) {
+            switch (event.getAction()) {
+
+                case MotionEvent.ACTION_DOWN:
+                    //画面がタッチされたときの動作
+                    if (1 == 1) {//todo:ifタッチ箇所==キャラクター
+                        NEXT_SCENE = OP;
+                    }
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    //タッチしたまま移動したときの動作
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    //タッチが離されたときの動作
+                    break;
+
+                case MotionEvent.ACTION_CANCEL:
+                    //他の要因によってタッチがキャンセルされたときの動作
+                    break;
+
             }
         }
         return true;
