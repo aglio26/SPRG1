@@ -147,7 +147,7 @@ public class SRPGView extends SurfaceView
                 sleep(0);
 
             }
-            if (SCENE == MAP) {//todo:マップの読み込み、マップ定数の設定、及び描画の実装　ゴール地点設定 キャラクター描画
+            if (SCENE == MAP) {//todo：MAP描画の実装　キャラクター描画（カズさん担当）
                 lock();
                 canvas.drawColor(Color.WHITE);
                 Paint paint = new Paint();
