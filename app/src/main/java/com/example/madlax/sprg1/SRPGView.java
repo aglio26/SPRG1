@@ -14,6 +14,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.Log;
 import android.text.TextPaint;
+import android.view.TouchDelegate;
 
 /**
  * Created by madlax on 2017/03/27.
@@ -34,7 +35,7 @@ public class SRPGView extends SurfaceView
     int Touch_Coordinate[] = new int[2];
     int Chara_Coordinate[] = new int[2];
     int Chara_Touch_Distance;
-    Rect[][] Map_data = new Rect[n][m];;//描画領域
+    Rect[][] Map_domain = new Rect[n][m];;//描画領域
     //SystemConstant
     public SurfaceHolder holder;
     public Thread thread;
@@ -49,6 +50,9 @@ public class SRPGView extends SurfaceView
     static int GAMEOVER = 9;
     //CharactorConstant
     int Reachable = 4;
+    //MapConstant
+    int[][] Map = new int[n][m];
+    int MapID = 0;
 
 
 
@@ -68,9 +72,12 @@ public class SRPGView extends SurfaceView
     public void generateMapDomain(int n,int m,int originX,int originY,int cell){
         for(int i=0;i<n;i++) {
             for (int j = 0; j < m; j++) {
-                Map_data[i][j] = new Rect(originX + i * cell, originY + j * cell, originX + (1 + i) * cell, originY + (1 + j) * cell);
+                Map_domain[i][j] = new Rect(originX + i * cell, originY + j * cell, originX + (1 + i) * cell, originY + (1 + j) * cell);
             }
         }
+    }
+    public int get_TouchMapID(int coordinate_x,int coordinate_y){
+        return Map[coordinate_x][coordinate_y];
     }
 
     //Constructor
@@ -126,7 +133,7 @@ public class SRPGView extends SurfaceView
                 Paint paint1 = new Paint();
                 paint1.setColor(Color.BLUE);
                 paint1.setTextSize(48);
-                canvas.drawText("Mapdata origin:"+Map_data[0][0].left+","+Map_data[0][0].top,50,100,paint1);
+                canvas.drawText("Mapdata origin:"+Map_domain[0][0].left+","+Map_domain[0][0].top,50,100,paint1);
                 Paint paint2 = new Paint();
                 paint2.setColor(Color.BLUE);
                 paint2.setTextSize(48);
@@ -136,7 +143,7 @@ public class SRPGView extends SurfaceView
                 paint3.setStyle(Paint.Style.STROKE);
                 for(int i=0;i<n;i++){
                     for(int j=0;j<m;j++){
-                        canvas.drawRect(Map_data[i][j],paint3);
+                        canvas.drawRect(Map_domain[i][j],paint3);
                     }
                 }
                 Paint paint4 = new Paint();
@@ -197,6 +204,7 @@ public class SRPGView extends SurfaceView
         Touch_Coordinate[0] = ((int)touchX-originX)/cell;
         Touch_Coordinate[1] = ((int)touchY-originY)/cell;
         Chara_Touch_Distance = Math.abs(Touch_Coordinate[0]-Chara_Coordinate[0])+Math.abs(Touch_Coordinate[1]-Chara_Coordinate[1]);
+        MapID = get_TouchMapID(Touch_Coordinate[0], Touch_Coordinate[1]);
 
         if(SCENE == OP){
             switch ( event.getAction() ) {
@@ -276,7 +284,7 @@ public class SRPGView extends SurfaceView
             }
         }
         return true;
-    }//todo:タッチ待ち受け　タッチによるキャラクターの移動の実装
+    }//todo:タッチ待ち受け　タッチによるキャラクターの移動の実装  アニメーション　SE 戦闘
 }
 
 
