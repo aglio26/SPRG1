@@ -19,15 +19,15 @@ import android.view.TouchDelegate;
 /**
  * Created by madlax on 2017/03/27.
  */
-
+//teest
 public class SRPGView extends SurfaceView
     implements SurfaceHolder.Callback, Runnable {
     //field variable
     int w;//画面横幅
     int h;//画面縦幅
     int cell;//セルサイズ
-    int n = 6;//セル数横
-    int m = 8;//セル数縦
+    int n = 8;//セル数横
+    int m = 10;//セル数縦
     int originX;//座標原点X
     int originY;//座標原点Y
     float touchX;//タッチ座標
@@ -72,7 +72,7 @@ public class SRPGView extends SurfaceView
     public void generateMapDomain(int n,int m,int originX,int originY,int cell){
         for(int i=0;i<n;i++) {
             for (int j = 0; j < m; j++) {
-                Map_domain[i][j] = new Rect(originX + i * cell, originY + j * cell, originX + (1 + i) * cell, originY + (1 + j) * cell);
+                Map_domain[i][j] = new Rect(originX + i * cell+i, originY + j * cell+j, originX + (1 + i) * cell+i, originY + (1 + j) * cell+j);
             }
         }
     }
