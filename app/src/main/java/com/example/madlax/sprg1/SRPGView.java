@@ -19,7 +19,7 @@ import android.view.TouchDelegate;
 /**
  * Created by madlax on 2017/03/27.
  */
-
+//teest
 public class SRPGView extends SurfaceView
     implements SurfaceHolder.Callback, Runnable {
     //field variable
