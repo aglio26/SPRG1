@@ -165,7 +165,7 @@ public class SRPGView extends SurfaceView
                 paint1.setTextSize(48);
                 canvas.drawText("Touch:"+Touch_Coordinate[0]+","+Touch_Coordinate[1]+"Chara:"+Chara_Coordinate[0]+","+Chara_Coordinate[1],60,100,paint1);
 
-                //イメージの読み込み（getResourcesでmap0.pngを読み込む）
+                //イメージの読み込み（getResourcesでmap0.pngを読み込む。）
 
                 int w = image.getWidth();                                        //画像の横幅読込
                 int h = image.getHeight();                                       //画像の高さ読込
