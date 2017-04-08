@@ -164,9 +164,19 @@ public class SRPGView extends SurfaceView
                 Paint paint1 = new Paint();
                 paint1.setTextSize(48);
                 canvas.drawText("Touch:"+Touch_Coordinate[0]+","+Touch_Coordinate[1]+"Chara:"+Chara_Coordinate[0]+","+Chara_Coordinate[1],60,100,paint1);
+
+                //イメージの読み込み（getResourcesでmap0.pngを読み込む）
+
+                int w = image.getWidth();                                        //画像の横幅読込
+                int h = image.getHeight();                                       //画像の高さ読込
+                Rect src = new Rect(0,0,w,h);
+                for(int i=0;i<n;i++){
+                    for(int j=0;j<m;j++) {
+                        canvas.drawBitmap(image,src,Map_domain[i][j],null);
+                    }
+                }
                 unlock();
                 sleep(600);
-
             }
             if (SCENE == MOVE_READY) {// todo:移動可能領域の取得、及び領域の描画の実装　
                 lock();
