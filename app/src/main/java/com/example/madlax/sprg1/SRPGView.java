@@ -2,6 +2,9 @@ package com.example.madlax.sprg1;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.text.method.Touch;
 import android.view.SurfaceHolder;
@@ -53,8 +56,7 @@ public class SRPGView extends SurfaceView
     //MapConstant
     int[][] Map = new int[n][m];
     int MapID = 0;
-
-
+    private Bitmap map;
 
     //user defined method //todo:タッチ入力待ち受け関数の実装 画像読み込み関数の実装
     public void lock(){
@@ -102,6 +104,9 @@ public class SRPGView extends SurfaceView
         Touch_Coordinate[1] = 0;
         Chara_Coordinate[0] = 0;
         Chara_Coordinate[1] = 0;
+        //画像の読込
+        Resources r = context.getResources();                           //リソースのインスタンス生成
+        map = BitmapFactory.decodeResource(r, R.drawable.map0);   //Bitmapクラスオブジェクトの生成
         //scene constant
         NEXT_SCENE = 0;
     }
@@ -165,14 +170,12 @@ public class SRPGView extends SurfaceView
                 paint1.setTextSize(48);
                 canvas.drawText("Touch:"+Touch_Coordinate[0]+","+Touch_Coordinate[1]+"Chara:"+Chara_Coordinate[0]+","+Chara_Coordinate[1],60,100,paint1);
 
-                //イメージの読み込み（getResourcesでmap0.pngを読み込む。）
-
-                int w = image.getWidth();                                        //画像の横幅読込
-                int h = image.getHeight();                                       //画像の高さ読込
+                int w = map.getWidth();                                        //画像の横幅読込
+                int h = map.getHeight();                                       //画像の高さ読込
                 Rect src = new Rect(0,0,w,h);
                 for(int i=0;i<n;i++){
                     for(int j=0;j<m;j++) {
-                        canvas.drawBitmap(image,src,Map_domain[i][j],null);
+                        canvas.drawBitmap(map,src,Map_domain[i][j],null);
                     }
                 }
                 unlock();
