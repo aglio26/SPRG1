@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.text.method.Touch;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Display;
@@ -15,9 +14,6 @@ import android.view.MotionEvent;
 import android.graphics.Paint;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.util.Log;
-import android.text.TextPaint;
-import android.view.TouchDelegate;
 
 /**
  * Created by madlax on 2017/03/27.
@@ -29,8 +25,8 @@ public class SRPGView extends SurfaceView
     int w;//画面横幅
     int h;//画面縦幅
     int cell;//セルサイズ
-    int n = 8;//セル数横
-    int m = 10;//セル数縦
+    int n;//セル数横
+    int m;//セル数縦
     int originX;//座標原点X
     int originY;//座標原点Y
     float touchX;//タッチ座標
@@ -38,7 +34,20 @@ public class SRPGView extends SurfaceView
     int Touch_Coordinate[] = new int[2];
     int Chara_Coordinate[] = new int[2];
     int Chara_Touch_Distance;
-    Rect[][] Draw_domain = new Rect[n][m];;//描画領域
+        //地形情報
+    Rect src;
+    Rect[][] Draw_domain;//描画領域
+    Chapter chapter1;
+    int[][] C1 = {
+            {1,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,2,0,0,0,0,0,0,0,0},
+            {0,0,0,1,1,0,0,0,0,0},
+            {0,0,1,1,1,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0}};
+    Terrain[][] terrain1;
     //SystemConstant
     public SurfaceHolder holder;
     public Thread thread;
@@ -54,9 +63,10 @@ public class SRPGView extends SurfaceView
     //CharactorConstant
     int Reachable = 4;
     //MapConstant
-    int[][] Map = new int[n][m];
-    int MapID = 0;
-    private Bitmap map;
+    int[][] Map;
+    private Bitmap map0;
+    private Bitmap map1;
+    private Bitmap map2;
 
     //user defined method //todo:タッチ入力待ち受け関数の実装 画像読み込み関数の実装
     public void lock(){
@@ -71,15 +81,53 @@ public class SRPGView extends SurfaceView
         }catch(Exception e){
         }
     }
-    public void generateMapDomain(int n,int m,int originX,int originY,int cell){
+
+    public int get_TouchMapID(int coordinate_x,int coordinate_y){
+        return Map[coordinate_x][coordinate_y];
+    }
+    //地形情報生成
+    public void generateTerrain(int n,int m,int originX,int originY,int cell,int chapterMap[][],Terrain terrain[][]){
         for(int i=0;i<n;i++) {
-            for (int j = 0; j < m; j++) {
-                Draw_domain[i][j] = new Rect(originX + i * cell, originY + j * cell, originX + (1 + i) * cell, originY + (1 + j) * cell);
+            for (int j=0;j<m;j++) {
+                terrain[i][j].Terrain_Coordinate[0] = i;
+                terrain[i][j].Terrain_Coordinate[1] = j;
+                terrain[i][j].Terrain_Domain.left = originX + i * cell;
+                terrain[i][j].Terrain_Domain.top = originY + j * cell;
+                terrain[i][j].Terrain_Domain.right = originX + (1 + i) * cell;
+                terrain[i][j].Terrain_Domain.bottom = originY + (1 + j) * cell;
+
+                if (chapterMap[i][j] == 0) {
+                    terrain[i][j].avoid = 10;
+                    terrain[i][j].move_cost = -1;
+                    terrain[i][j].Terrain_pic = map0;
+                }
+                if (chapterMap[i][j] == 1) {
+                    terrain[i][j].avoid = 10;
+                    terrain[i][j].move_cost = -1;
+                    terrain[i][j].Terrain_pic = map1;
+                }
+                if (chapterMap[i][j] == 2){
+                    terrain[i][j].avoid = 10;
+                    terrain[i][j].move_cost = -1;
+                    terrain[i][j].Terrain_pic = map2;
+                }
             }
         }
     }
-    public int get_TouchMapID(int coordinate_x,int coordinate_y){
-        return Map[coordinate_x][coordinate_y];
+    //地形情報初期化
+    public void initTerrain(Terrain terrain){
+        terrain = new Terrain();
+    }
+    //画像の描画元領域の取得
+    public Rect getSrc(Bitmap bitmap){
+        src = new Rect();
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        src.bottom = h;
+        src.right = w;
+        src.left = 0;
+        src.top = 0;
+        return src;
     }
 
     //Constructor
@@ -88,6 +136,19 @@ public class SRPGView extends SurfaceView
         //generate surface holder
         holder = getHolder();
         holder.addCallback(this);
+        //get cell number
+        chapter1 = new Chapter(8,10,C1);
+        n = chapter1.getCellnumberX();
+        m = chapter1.getCellnumberY();
+        //配列の初期化
+        Draw_domain = new Rect[n][m];
+        Map = new int[n][m];
+        terrain1 = new Terrain[n][m];
+        for(int i=0;i<n;i++) {
+            for (int j = 0; j < m; j++) {
+                terrain1[i][j] = new Terrain();
+            }
+        }
         //get screen size and get origin,cell
         Display display = ((Activity)context).getWindowManager().getDefaultDisplay();
         Point p = new Point();
@@ -97,8 +158,6 @@ public class SRPGView extends SurfaceView
         cell = Math.min(w/n,h/m)-20;
         originX = (w-n*cell)/2;
         originY = (h-m*cell)/2;
-        //initialize Map_data
-        generateMapDomain(n,m,originX,originY,cell);
         //initialize each array
         Touch_Coordinate[0] = 0;
         Touch_Coordinate[1] = 0;
@@ -106,7 +165,11 @@ public class SRPGView extends SurfaceView
         Chara_Coordinate[1] = 0;
         //画像の読込
         Resources r = context.getResources();                           //リソースのインスタンス生成
-        map = BitmapFactory.decodeResource(r, R.drawable.map0);   //Bitmapクラスオブジェクトの生成
+        map0 = BitmapFactory.decodeResource(r, R.drawable.map0);   //Bitmapクラスオブジェクトの生成
+        map1 = BitmapFactory.decodeResource(r, R.drawable.map1);
+        map2 = BitmapFactory.decodeResource(r, R.drawable.map2);
+        //地形情報生成
+        generateTerrain(n,m,originX,originY,cell,chapter1.MAP,terrain1);
         //scene constant
         NEXT_SCENE = 0;
     }
@@ -138,7 +201,7 @@ public class SRPGView extends SurfaceView
                 Paint paint1 = new Paint();
                 paint1.setColor(Color.BLUE);
                 paint1.setTextSize(48);
-                canvas.drawText("Mapdata origin:"+Draw_domain[0][0].left+","+Draw_domain[0][0].top,50,100,paint1);
+                canvas.drawText("Mapdata origin:"+terrain1[0][0].Terrain_Domain.left+","+terrain1[0][0].Terrain_Domain.top,50,100,paint1);
                 Paint paint2 = new Paint();
                 paint2.setColor(Color.BLUE);
                 paint2.setTextSize(48);
@@ -148,7 +211,7 @@ public class SRPGView extends SurfaceView
                 paint3.setStyle(Paint.Style.STROKE);
                 for(int i=0;i<n;i++){
                     for(int j=0;j<m;j++){
-                        canvas.drawRect(Draw_domain[i][j],paint3);
+                        canvas.drawRect(terrain1[i][j].Terrain_Domain,paint3);
                     }
                 }
                 Paint paint4 = new Paint();
@@ -170,12 +233,10 @@ public class SRPGView extends SurfaceView
                 paint1.setTextSize(48);
                 canvas.drawText("Touch:"+Touch_Coordinate[0]+","+Touch_Coordinate[1]+"Chara:"+Chara_Coordinate[0]+","+Chara_Coordinate[1],60,100,paint1);
 
-                int w = map.getWidth();                                        //画像の横幅読込
-                int h = map.getHeight();                                       //画像の高さ読込
-                Rect src = new Rect(0,0,w,h);
+
                 for(int i=0;i<n;i++){
                     for(int j=0;j<m;j++) {
-                        canvas.drawBitmap(map,src,Draw_domain[i][j],null);
+                        canvas.drawBitmap(terrain1[i][j].Terrain_pic,getSrc(terrain1[i][j].Terrain_pic),terrain1[i][j].Terrain_Domain,null);
                     }
                 }
                 unlock();
@@ -191,6 +252,11 @@ public class SRPGView extends SurfaceView
                 Paint paint1 = new Paint();
                 paint1.setTextSize(48);
                 canvas.drawText("Touch:"+Touch_Coordinate[0]+","+Touch_Coordinate[1]+"Chara:"+Chara_Coordinate[0]+","+Chara_Coordinate[1],60,100,paint1);
+                for(int i=0;i<n;i++){
+                    for(int j=0;j<m;j++) {
+                        canvas.drawBitmap(terrain1[i][j].Terrain_pic,getSrc(terrain1[i][j].Terrain_pic),terrain1[i][j].Terrain_Domain,null);
+                    }
+                }
                 unlock();
                 sleep(0);
             }
@@ -218,7 +284,6 @@ public class SRPGView extends SurfaceView
             Touch_Coordinate[0] = ((int) touchX - originX) / cell;
             Touch_Coordinate[1] = ((int) touchY - originY) / cell;
             Chara_Touch_Distance = Math.abs(Touch_Coordinate[0] - Chara_Coordinate[0]) + Math.abs(Touch_Coordinate[1] - Chara_Coordinate[1]);
-            MapID = get_TouchMapID(Touch_Coordinate[0], Touch_Coordinate[1]);
         }
         if(SCENE == SC_OP){
             switch ( event.getAction() ) {
@@ -249,7 +314,7 @@ public class SRPGView extends SurfaceView
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
-                    if(Chara_Touch_Distance == 0){//todo:ifタッチ箇所==キャラクター
+                    if(Chara_Touch_Distance == 0&&originX<touchX&&touchX<n*cell+originX&&originY<touchY&&touchY<m*cell+originY){//todo:ifタッチ箇所==キャラクター
                         NEXT_SCENE = SC_MOVEREADY;
                     }
                     break;
