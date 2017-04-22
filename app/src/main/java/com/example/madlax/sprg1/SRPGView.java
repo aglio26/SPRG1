@@ -38,7 +38,7 @@ public class SRPGView extends SurfaceView
     int Touch_Coordinate[] = new int[2];
     int Chara_Coordinate[] = new int[2];
     int Chara_Touch_Distance;
-    Rect[][] Map_domain = new Rect[n][m];;//描画領域
+    Rect[][] Draw_domain = new Rect[n][m];;//描画領域
     //SystemConstant
     public SurfaceHolder holder;
     public Thread thread;
@@ -46,11 +46,11 @@ public class SRPGView extends SurfaceView
     //SceneConstant
     int SCENE = -1;
     int NEXT_SCENE = -1;
-    static int OP = 0;
-    static int MAP = 1;
-    static int MOVE_READY = 2;
-    static int BATTLE = 3;
-    static int GAMEOVER = 9;
+    static int SC_OP = 0;
+    static int SC_MAP = 1;
+    static int SC_MOVEREADY = 2;
+    static int SC_BATTLE = 3;
+    static int SC_GAMEOVER = 9;
     //CharactorConstant
     int Reachable = 4;
     //MapConstant
@@ -74,7 +74,7 @@ public class SRPGView extends SurfaceView
     public void generateMapDomain(int n,int m,int originX,int originY,int cell){
         for(int i=0;i<n;i++) {
             for (int j = 0; j < m; j++) {
-                Map_domain[i][j] = new Rect(originX + i * cell+i, originY + j * cell+j, originX + (1 + i) * cell+i, originY + (1 + j) * cell+j);
+                Draw_domain[i][j] = new Rect(originX + i * cell, originY + j * cell, originX + (1 + i) * cell, originY + (1 + j) * cell);
             }
         }
     }
@@ -128,7 +128,7 @@ public class SRPGView extends SurfaceView
     public void run() {
         while (thread != null) {
             SCENE = NEXT_SCENE;
-            if (SCENE == OP) {//todo:OP画像の表示及びBGMの実装
+            if (SCENE == SC_OP) {//todo:OP画像の表示及びBGMの実装
                 lock();
                 canvas.drawColor(Color.WHITE);
                 Paint paint = new Paint();
@@ -138,7 +138,7 @@ public class SRPGView extends SurfaceView
                 Paint paint1 = new Paint();
                 paint1.setColor(Color.BLUE);
                 paint1.setTextSize(48);
-                canvas.drawText("Mapdata origin:"+Map_domain[0][0].left+","+Map_domain[0][0].top,50,100,paint1);
+                canvas.drawText("Mapdata origin:"+Draw_domain[0][0].left+","+Draw_domain[0][0].top,50,100,paint1);
                 Paint paint2 = new Paint();
                 paint2.setColor(Color.BLUE);
                 paint2.setTextSize(48);
@@ -148,7 +148,7 @@ public class SRPGView extends SurfaceView
                 paint3.setStyle(Paint.Style.STROKE);
                 for(int i=0;i<n;i++){
                     for(int j=0;j<m;j++){
-                        canvas.drawRect(Map_domain[i][j],paint3);
+                        canvas.drawRect(Draw_domain[i][j],paint3);
                     }
                 }
                 Paint paint4 = new Paint();
@@ -159,7 +159,7 @@ public class SRPGView extends SurfaceView
                 sleep(0);
 
             }
-            if (SCENE == MAP) {//todo：MAP描画の実装　キャラクター描画（カズさん担当）
+            if (SCENE == SC_MAP) {//todo：MAP描画の実装　キャラクター描画（カズさん担当）
                 lock();
                 canvas.drawColor(Color.WHITE);
                 Paint paint = new Paint();
@@ -175,13 +175,13 @@ public class SRPGView extends SurfaceView
                 Rect src = new Rect(0,0,w,h);
                 for(int i=0;i<n;i++){
                     for(int j=0;j<m;j++) {
-                        canvas.drawBitmap(map,src,Map_domain[i][j],null);
+                        canvas.drawBitmap(map,src,Draw_domain[i][j],null);
                     }
                 }
                 unlock();
                 sleep(600);
             }
-            if (SCENE == MOVE_READY) {// todo:移動可能領域の取得、及び領域の描画の実装　
+            if (SCENE == SC_MOVEREADY) {// todo:移動可能領域の取得、及び領域の描画の実装　
                 lock();
                 canvas.drawColor(Color.WHITE);
                 Paint paint = new Paint();
@@ -194,7 +194,7 @@ public class SRPGView extends SurfaceView
                 unlock();
                 sleep(0);
             }
-            if (SCENE == GAMEOVER) {
+            if (SCENE == SC_GAMEOVER) {
                 lock();
                 canvas.drawColor(Color.WHITE);
                 Paint paint = new Paint();
@@ -203,7 +203,7 @@ public class SRPGView extends SurfaceView
                 canvas.drawText("GAMEOVER",80,50,paint);
                 unlock();
                 sleep(0);
-                SCENE = OP;
+                SCENE = SC_OP;
 
             }
 
@@ -214,18 +214,19 @@ public class SRPGView extends SurfaceView
     public boolean onTouchEvent(MotionEvent event) {
         touchX = event.getX();
         touchY = event.getY();
-        Touch_Coordinate[0] = ((int)touchX-originX)/cell;
-        Touch_Coordinate[1] = ((int)touchY-originY)/cell;
-        Chara_Touch_Distance = Math.abs(Touch_Coordinate[0]-Chara_Coordinate[0])+Math.abs(Touch_Coordinate[1]-Chara_Coordinate[1]);
-        MapID = get_TouchMapID(Touch_Coordinate[0], Touch_Coordinate[1]);
-
-        if(SCENE == OP){
+        if(originX<touchX&&touchX<n*cell+originX&&originY<touchY&&touchY<m*cell+originY) {
+            Touch_Coordinate[0] = ((int) touchX - originX) / cell;
+            Touch_Coordinate[1] = ((int) touchY - originY) / cell;
+            Chara_Touch_Distance = Math.abs(Touch_Coordinate[0] - Chara_Coordinate[0]) + Math.abs(Touch_Coordinate[1] - Chara_Coordinate[1]);
+            MapID = get_TouchMapID(Touch_Coordinate[0], Touch_Coordinate[1]);
+        }
+        if(SCENE == SC_OP){
             switch ( event.getAction() ) {
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
 
-                    NEXT_SCENE = MAP;
+                    NEXT_SCENE = SC_MAP;
                     break;
 
                 case MotionEvent.ACTION_MOVE:
@@ -243,13 +244,13 @@ public class SRPGView extends SurfaceView
             }
 
         }
-        else if(SCENE == MAP){
+        else if(SCENE == SC_MAP){
             switch ( event.getAction() ) {
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
                     if(Chara_Touch_Distance == 0){//todo:ifタッチ箇所==キャラクター
-                        NEXT_SCENE = MOVE_READY;
+                        NEXT_SCENE = SC_MOVEREADY;
                     }
                     break;
 
@@ -268,7 +269,7 @@ public class SRPGView extends SurfaceView
             }
 
         }
-        else if(SCENE == MOVE_READY) {
+        else if(SCENE == SC_MOVEREADY) {
             switch (event.getAction()) {
 
                 case MotionEvent.ACTION_DOWN:
@@ -276,10 +277,10 @@ public class SRPGView extends SurfaceView
                     if (Chara_Touch_Distance <= Reachable) {//todo:ifタッチ箇所==キャラクター
                         Chara_Coordinate[0] = Touch_Coordinate[0];
                         Chara_Coordinate[1] = Touch_Coordinate[1];
-                        NEXT_SCENE = MAP;
+                        NEXT_SCENE = SC_MAP;
                     }
                     if (Chara_Touch_Distance > Reachable){
-                        NEXT_SCENE = MAP;
+                        NEXT_SCENE = SC_MAP;
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
