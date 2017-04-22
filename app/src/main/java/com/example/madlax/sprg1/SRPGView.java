@@ -167,14 +167,14 @@ public class SRPGView extends SurfaceView
 
                 //イメージの読み込み（getResourcesでmap0.pngを読み込む。）
 
-                int w = image.getWidth();                                        //画像の横幅読込
-                int h = image.getHeight();                                       //画像の高さ読込
-                Rect src = new Rect(0,0,w,h);
-                for(int i=0;i<n;i++){
-                    for(int j=0;j<m;j++) {
-                        canvas.drawBitmap(image,src,Map_domain[i][j],null);
-                    }
-                }
+//                int w = image.getWidth();                                        //画像の横幅読込
+//                int h = image.getHeight();                                       //画像の高さ読込
+//                Rect src = new Rect(0,0,w,h);
+//                for(int i=0;i<n;i++){
+//                    for(int j=0;j<m;j++) {
+//                        canvas.drawBitmap(image,src,Map_domain[i][j],null);
+//                    }
+//                }
                 unlock();
                 sleep(600);
             }
@@ -214,8 +214,10 @@ public class SRPGView extends SurfaceView
         Touch_Coordinate[0] = ((int)touchX-originX)/cell;
         Touch_Coordinate[1] = ((int)touchY-originY)/cell;
         Chara_Touch_Distance = Math.abs(Touch_Coordinate[0]-Chara_Coordinate[0])+Math.abs(Touch_Coordinate[1]-Chara_Coordinate[1]);
-        MapID = get_TouchMapID(Touch_Coordinate[0], Touch_Coordinate[1]);
 
+        if(originX<=touchX&&touchX<=originX+n*cell&&originY<=touchY&&touchY<=originY+m*cell) {
+            MapID = get_TouchMapID(Touch_Coordinate[0], Touch_Coordinate[1]);
+        }
         if(SCENE == OP){
             switch ( event.getAction() ) {
 
