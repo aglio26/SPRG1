@@ -48,6 +48,8 @@ public class SRPGView extends SurfaceView
             {0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0}};
     Terrain[][] terrain1;
+        //キャラクター
+    Chara Reimu;
     //SystemConstant
     public SurfaceHolder holder;
     public Thread thread;
@@ -67,6 +69,7 @@ public class SRPGView extends SurfaceView
     private Bitmap map0;
     private Bitmap map1;
     private Bitmap map2;
+    public Bitmap reimu;
 
     //user defined method //todo:タッチ入力待ち受け関数の実装 画像読み込み関数の実装
     public void lock(){
@@ -80,6 +83,10 @@ public class SRPGView extends SurfaceView
             Thread.sleep(time);
         }catch(Exception e){
         }
+    }
+    public void moveChara(Chara chara,int[] idougo){
+        chara.chara_coordinate[0]=idougo[0];
+        chara.chara_coordinate[1]=idougo[1];
     }
 
     public int get_TouchMapID(int coordinate_x,int coordinate_y){
@@ -168,8 +175,11 @@ public class SRPGView extends SurfaceView
         map0 = BitmapFactory.decodeResource(r, R.drawable.map0);   //Bitmapクラスオブジェクトの生成
         map1 = BitmapFactory.decodeResource(r, R.drawable.map1);
         map2 = BitmapFactory.decodeResource(r, R.drawable.map2);
+        reimu = BitmapFactory.decodeResource(r, R.drawable.reimu);
         //地形情報生成
         generateTerrain(n,m,originX,originY,cell,chapter1.MAP,terrain1);
+        //キャラクター情報生成
+        Reimu = new Chara(20,5,5,0,0,reimu);
         //scene constant
         NEXT_SCENE = 0;
     }
@@ -239,6 +249,7 @@ public class SRPGView extends SurfaceView
                         canvas.drawBitmap(terrain1[i][j].Terrain_pic,getSrc(terrain1[i][j].Terrain_pic),terrain1[i][j].Terrain_Domain,null);
                     }
                 }
+                canvas.drawBitmap(Reimu.chara_bitmap,getSrc(Reimu.chara_bitmap),Reimu.getCharaRect(originX,originY,cell,Reimu.chara_coordinate[0],Reimu.chara_coordinate[1]),null);
                 unlock();
                 sleep(600);
             }
@@ -257,6 +268,7 @@ public class SRPGView extends SurfaceView
                         canvas.drawBitmap(terrain1[i][j].Terrain_pic,getSrc(terrain1[i][j].Terrain_pic),terrain1[i][j].Terrain_Domain,null);
                     }
                 }
+                canvas.drawBitmap(Reimu.chara_bitmap,getSrc(Reimu.chara_bitmap),Reimu.getCharaRect(originX,originY,cell,Reimu.chara_coordinate[0],Reimu.chara_coordinate[1]),null);
                 unlock();
                 sleep(0);
             }
@@ -342,6 +354,7 @@ public class SRPGView extends SurfaceView
                     if (Chara_Touch_Distance <= Reachable) {//todo:ifタッチ箇所==キャラクター
                         Chara_Coordinate[0] = Touch_Coordinate[0];
                         Chara_Coordinate[1] = Touch_Coordinate[1];
+                        moveChara(Reimu,Touch_Coordinate);
                         NEXT_SCENE = SC_MAP;
                     }
                     if (Chara_Touch_Distance > Reachable){
