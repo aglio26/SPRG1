@@ -7,15 +7,15 @@ package com.example.madlax.sprg1;
 public class Chapter {
 
     //定数
-    int numberOfCellX;  //横方向セル数
-    int numberOfCellY;  //縦方向セル数
+    int numCellX;  //横方向セル数
+    int numCellY;  //縦方向セル数
     int[][] MAP;
 
     //constructor
     public Chapter(int x, int y, int C[][]) {
-        numberOfCellX = x;
-        numberOfCellY = y;
-        MAP = new int[numberOfCellX][numberOfCellY];
+        numCellX = x;
+        numCellY = y;
+        MAP = new int[numCellX][numCellY];
         for (int i=0;i<x;i++){
             for(int j=0;j<y;j++){
                 MAP[i][j] = C[i][j];
@@ -24,11 +24,11 @@ public class Chapter {
     }
 
     //method
-    public int getNumberOfCellX(){
-        return numberOfCellX;
+    public int getNumCellX(){
+        return numCellX;
     }
-    public int getNumberOfCellY(){
-        return numberOfCellY;
+    public int getNumCellY(){
+        return numCellY;
     }
 
 }

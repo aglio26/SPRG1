@@ -38,12 +38,12 @@ public class Character {
     public Bitmap getCharacterBitmap(){
         return characterBitmap;
     }
-    public Rect getCharaRect(int originX, int originY, int cellSize, int charaCoordinateX, int charaCoordinateY){
+    public Rect getCharaRect(int originX, int originY, int cellSize, int charCoordX, int charCoordY){
         characterRect = new Rect();
-        characterRect.left = originX + charaCoordinateX * cellSize;
-        characterRect.top = originY + charaCoordinateY * cellSize;
-        characterRect.right = originX + ( 1 + charaCoordinateX ) * cellSize;
-        characterRect.bottom = originY + ( 1 + charaCoordinateY ) * cellSize;
+        characterRect.left = originX + charCoordX * cellSize;
+        characterRect.top = originY + charCoordY * cellSize;
+        characterRect.right = originX + ( 1 + charCoordX ) * cellSize;
+        characterRect.bottom = originY + ( 1 + charCoordY ) * cellSize;
         return characterRect;
     }
 }

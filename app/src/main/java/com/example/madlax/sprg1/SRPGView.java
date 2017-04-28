@@ -25,14 +25,14 @@ public class SRPGView extends SurfaceView
     int screenWidth;    //画面横幅
     int screenHeight;   //画面縦幅
     int cellSize;       //セルサイズ
-    int numberOfCellX;  //セル数横
-    int numberOfCellY;  //セル数縦
+    int numCellX;       //セル数横
+    int numCellY;       //セル数縦
     int originX;        //座標原点X
     int originY;        //座標原点Y
     float touchX;       //タッチ座標
     float touchY;       //タッチ座標
-    int touchCoordinate[] = new int[2];
-    int charaCoordinate[] = new int[2];
+    int touchCoordinate[] = new int[2]; //タッチした座標
+    int charaCoordinate[] = new int[2]; //キャラクターの座標
     int charaTouchDistance;
 
     //地形情報
@@ -130,10 +130,10 @@ public class SRPGView extends SurfaceView
     //画像の描画元領域の取得
     public Rect getSrc(Bitmap bitmap){
         src = new Rect();
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
-        src.bottom = h;
-        src.right = w;
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        src.bottom = height;
+        src.right = width;
         src.left = 0;
         src.top = 0;
         return src;
@@ -147,14 +147,14 @@ public class SRPGView extends SurfaceView
         holder.addCallback(this);
         //get cellSize number
         chapter1 = new Chapter(8,10,C1);
-        numberOfCellX = chapter1.getNumberOfCellX();
-        numberOfCellY = chapter1.getNumberOfCellY();
+        numCellX = chapter1.getNumCellX();
+        numCellY = chapter1.getNumCellY();
         //配列の初期化
-        drawDomain = new Rect[numberOfCellX][numberOfCellY];
-        Map = new int[numberOfCellX][numberOfCellY];
-        terrain1 = new Terrain[numberOfCellX][numberOfCellY];
-        for(int i = 0; i< numberOfCellX; i++) {
-            for (int j = 0; j < numberOfCellY; j++) {
+        drawDomain = new Rect[numCellX][numCellY];
+        Map = new int[numCellX][numCellY];
+        terrain1 = new Terrain[numCellX][numCellY];
+        for(int i = 0; i< numCellX; i++) {
+            for (int j = 0; j < numCellY; j++) {
                 terrain1[i][j] = new Terrain();
             }
         }
@@ -164,9 +164,9 @@ public class SRPGView extends SurfaceView
         display.getSize(p);
         screenWidth = p.x;
         screenHeight = p.y;
-        cellSize = Math.min(screenWidth / numberOfCellX, screenHeight / numberOfCellY)-20;
-        originX = (screenWidth - numberOfCellX * cellSize)/2;
-        originY = (screenHeight - numberOfCellY * cellSize)/2;
+        cellSize = Math.min(screenWidth / numCellX, screenHeight / numCellY)-20;
+        originX = (screenWidth - numCellX * cellSize)/2;
+        originY = (screenHeight - numCellY * cellSize)/2;
         //initialize each array
         touchCoordinate[0] = 0;
         touchCoordinate[1] = 0;
@@ -179,7 +179,7 @@ public class SRPGView extends SurfaceView
         map2 = BitmapFactory.decodeResource(r, R.drawable.map2);
         reimu = BitmapFactory.decodeResource(r, R.drawable.reimu);
         //地形情報生成
-        generateTerrain(numberOfCellX, numberOfCellY,originX,originY, cellSize,chapter1.MAP,terrain1);
+        generateTerrain(numCellX, numCellY, originX, originY, cellSize, chapter1.MAP, terrain1);
         //キャラクター情報生成
         Reimu = new Character(20,5,5,0,0,reimu);
         //scene constant
@@ -221,8 +221,8 @@ public class SRPGView extends SurfaceView
                 Paint paint3 = new Paint();
                 paint3.setColor(Color.RED);
                 paint3.setStyle(Paint.Style.STROKE);
-                for(int i = 0; i< numberOfCellX; i++){
-                    for(int j = 0; j< numberOfCellY; j++){
+                for(int i = 0; i< numCellX; i++){
+                    for(int j = 0; j< numCellY; j++){
                         canvas.drawRect(terrain1[i][j].terrainDomain,paint3);
                     }
                 }
@@ -246,8 +246,8 @@ public class SRPGView extends SurfaceView
                 canvas.drawText("Touch:"+ touchCoordinate[0]+","+ touchCoordinate[1]+"Character:"+ charaCoordinate[0]+","+ charaCoordinate[1],60,100,paint1);
 
 
-                for(int i = 0; i< numberOfCellX; i++){
-                    for(int j = 0; j< numberOfCellY; j++) {
+                for(int i = 0; i< numCellX; i++){
+                    for(int j = 0; j< numCellY; j++) {
                         canvas.drawBitmap(terrain1[i][j].terrainPicture,getSrc(terrain1[i][j].terrainPicture),terrain1[i][j].terrainDomain,null);
                     }
                 }
@@ -265,8 +265,8 @@ public class SRPGView extends SurfaceView
                 Paint paint1 = new Paint();
                 paint1.setTextSize(48);
                 canvas.drawText("Touch:"+ touchCoordinate[0]+","+ touchCoordinate[1]+"Character:"+ charaCoordinate[0]+","+ charaCoordinate[1],60,100,paint1);
-                for(int i = 0; i< numberOfCellX; i++){
-                    for(int j = 0; j< numberOfCellY; j++) {
+                for(int i = 0; i< numCellX; i++){
+                    for(int j = 0; j< numCellY; j++) {
                         canvas.drawBitmap(terrain1[i][j].terrainPicture,getSrc(terrain1[i][j].terrainPicture),terrain1[i][j].terrainDomain,null);
                     }
                 }
@@ -292,7 +292,7 @@ public class SRPGView extends SurfaceView
     public boolean onTouchEvent(MotionEvent event) {
         touchX = event.getX();
         touchY = event.getY();
-        if(originX<touchX&&touchX< numberOfCellX * cellSize +originX&&originY<touchY&&touchY< numberOfCellY * cellSize +originY) {
+        if(originX<touchX&&touchX< numCellX * cellSize +originX&&originY<touchY&&touchY< numCellY * cellSize +originY) {
             touchCoordinate[0] = ((int) touchX - originX) / cellSize;
             touchCoordinate[1] = ((int) touchY - originY) / cellSize;
             charaTouchDistance = Math.abs(touchCoordinate[0] - charaCoordinate[0]) + Math.abs(touchCoordinate[1] - charaCoordinate[1]);
@@ -326,7 +326,7 @@ public class SRPGView extends SurfaceView
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
-                    if(charaTouchDistance == 0&&originX<touchX&&touchX< numberOfCellX * cellSize +originX&&originY<touchY&&touchY< numberOfCellY * cellSize +originY){//todo:ifタッチ箇所==キャラクター
+                    if(charaTouchDistance == 0&&originX<touchX&&touchX< numCellX * cellSize +originX&&originY<touchY&&touchY< numCellY * cellSize +originY){//todo:ifタッチ箇所==キャラクター
                         NEXT_SCENE = SC_MOVEREADY;
                     }
                     break;
