@@ -10,39 +10,37 @@ import android.graphics.Rect;
 public class Terrain {
     //field variable
     int avoid;
-    int move_cost;
-    int[] Terrain_Coordinate;
-    Rect Terrain_Domain;
-    Bitmap Terrain_pic;
-
+    int moveCost;
+    int[] terrainCoordinate;
+    Rect terrainDomain;
+    Bitmap terrainPicture;
 
     //constructor
     public Terrain() {
-        Terrain_Coordinate = new int[2];
+        terrainCoordinate = new int[2];
         avoid = 0;
-        move_cost = 0;
-        Terrain_Domain = new Rect();
-        Terrain_Coordinate[0]=0;
-        Terrain_Coordinate[1]=0;
+        moveCost = 0;
+        terrainDomain = new Rect();
+        terrainCoordinate[0]=0;
+        terrainCoordinate[1]=0;
     }
     //method
-    public int getMove_cost(){
-        return move_cost;
+    public int getMoveCost(){
+        return moveCost;
     }
     public int getAvoid(){
         return avoid;
     }
-    public int getTerrain_CorrdinateX(){
-        return Terrain_Coordinate[0];
+    public int getTerrainCorrdinateX(){
+        return terrainCoordinate[0];
     }
-    public int getTerrain_CorrdinateY(){
-        return Terrain_Coordinate[1];
+    public int getTerrainCorrdinateY(){
+        return terrainCoordinate[1];
     }
-    public Rect getTerrain_Domain(){
-        return Terrain_Domain;
+    public Rect getTerrainDomain(){
+        return terrainDomain;
     }
-    public Bitmap getTerrain_pic(){
-        return Terrain_pic;
+    public Bitmap getTerrainPicture(){
+        return terrainPicture;
     }
-
 }
