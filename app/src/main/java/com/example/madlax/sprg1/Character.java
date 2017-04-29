@@ -7,13 +7,13 @@ import android.graphics.Rect;
  */
 
 public class Character {
-    int hitPoint;
-    int magicPoint;
-    int MA;
+    private int hitPoint;
+    private int magicPoint;
+    private int MA;
     int charXcoord;
     int charYcoord;
     Bitmap characterBitmap;
-    Rect characterRect;
+    private Rect characterRect;
     //constructor
     public Character(int hp, int mp, int ma, int initX, int initY, Bitmap bitmap){
         hitPoint = hp;

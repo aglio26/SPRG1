@@ -9,7 +9,7 @@ import android.graphics.Rect;
 
 public class Terrain {
     //field variable
-    int avoid;
+    int avoidance;
     int moveCost;
     int terrainXcoord;
     int terrainYcoord;
@@ -18,7 +18,7 @@ public class Terrain {
 
     //constructor
     public Terrain() {
-        avoid = 0;
+        avoidance = 0;
         moveCost = 0;
         terrainDomain = new Rect();
         terrainXcoord = 0;
@@ -28,8 +28,8 @@ public class Terrain {
     public int getMoveCost(){
         return moveCost;
     }
-    public int getAvoid(){
-        return avoid;
+    public int getAvoidance(){
+        return avoidance;
     }
     public int getTerrainCorrdinateX(){
         return terrainXcoord;
