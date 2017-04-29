@@ -10,17 +10,17 @@ public class Character {
     int hitPoint;
     int magicPoint;
     int MA;
-    int[] characterCoordinate;
+    int charXcoord;
+    int charYcoord;
     Bitmap characterBitmap;
     Rect characterRect;
     //constructor
     public Character(int hp, int mp, int ma, int itiX, int itiY, Bitmap bitmap){
-        characterCoordinate = new int[2];
         hitPoint = hp;
         magicPoint = mp;
         MA = ma;
-        characterCoordinate[0]=itiX;
-        characterCoordinate[1]=itiY;
+        charXcoord=itiX;
+        charYcoord=itiY;
         characterBitmap = bitmap;
     }
     public int getCharaHP(){
@@ -30,10 +30,10 @@ public class Character {
         return magicPoint;
     }
     public int getCharaX(){
-        return characterCoordinate[0];
+        return charXcoord;
     }
     public int getCharaY(){
-        return characterCoordinate[1];
+        return charYcoord;
     }
     public Bitmap getCharacterBitmap(){
         return characterBitmap;

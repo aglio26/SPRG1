@@ -31,15 +31,15 @@ public class SRPGView extends SurfaceView
     int originY;        //座標原点Y
     float touchX;       //タッチ座標X
     float touchY;       //タッチ座標Y
-    int touchXcoord;   //タッチしたセルの座標X
-    int touchYcoord;   //タッチしたセルの座標Y
-    int charaXcoord;   //キャラクターの座標X
-    int charaYcoord;   //キャラクターの座標Y
-    int charaTouchDistance;
+    int touchXcoord;    //タッチしたセルの座標X
+    int touchYcoord;    //タッチしたセルの座標Y
+    int charXcoord;     //キャラクターの座標X
+    int charYcoord;     //キャラクターの座標Y
+    int charTouchDistance;
 
     //地形情報
     Rect src;
-    Rect[][] drawDomain;//描画領域
+    Rect[][] drawingDomain;//描画領域
     Chapter chapter1;
     int[][] C1 = {
             {1,0,0,0,0,0,0,0,0,0},
@@ -70,10 +70,10 @@ public class SRPGView extends SurfaceView
     int Reachable = 4;
     //MapConstant
     int[][] Map;
-    private Bitmap map0;
-    private Bitmap map1;
-    private Bitmap map2;
-    public Bitmap reimu;
+    private Bitmap imageFlatland;
+    private Bitmap imageGrass;
+    private Bitmap imageLake;
+    public Bitmap imageReimu;
 
     //user defined method //todo:タッチ入力待ち受け関数の実装 画像読み込み関数の実装
     public void lock(){
@@ -89,8 +89,8 @@ public class SRPGView extends SurfaceView
         }
     }
     public void moveChara(Character character, int idougoX, int idougoY){
-        character.characterCoordinate[0]=idougoX;
-        character.characterCoordinate[1]=idougoY;
+        character.charXcoord=idougoX;
+        character.charYcoord=idougoY;
     }
 
     public int get_TouchMapID(int coordinate_x,int coordinate_y){
@@ -110,17 +110,17 @@ public class SRPGView extends SurfaceView
                 if (chapterMap[i][j] == 0) {
                     terrain[i][j].avoid = 10;
                     terrain[i][j].moveCost = -1;
-                    terrain[i][j].terrainPicture = map0;
+                    terrain[i][j].terrainPicture = imageFlatland;
                 }
                 if (chapterMap[i][j] == 1) {
                     terrain[i][j].avoid = 10;
                     terrain[i][j].moveCost = -1;
-                    terrain[i][j].terrainPicture = map1;
+                    terrain[i][j].terrainPicture = imageGrass;
                 }
                 if (chapterMap[i][j] == 2){
                     terrain[i][j].avoid = 10;
                     terrain[i][j].moveCost = -1;
-                    terrain[i][j].terrainPicture = map2;
+                    terrain[i][j].terrainPicture = imageLake;
                 }
             }
         }
@@ -132,10 +132,8 @@ public class SRPGView extends SurfaceView
     //画像の描画元領域の取得
     public Rect getSrc(Bitmap bitmap){
         src = new Rect();
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        src.bottom = height;
-        src.right = width;
+        src.bottom = bitmap.getHeight();
+        src.right = bitmap.getWidth();
         src.left = 0;
         src.top = 0;
         return src;
@@ -152,7 +150,7 @@ public class SRPGView extends SurfaceView
         numCellX = chapter1.getNumCellX();
         numCellY = chapter1.getNumCellY();
         //配列の初期化
-        drawDomain = new Rect[numCellX][numCellY];
+        drawingDomain = new Rect[numCellX][numCellY];
         Map = new int[numCellX][numCellY];
         terrain1 = new Terrain[numCellX][numCellY];
         for(int i = 0; i< numCellX; i++) {
@@ -172,18 +170,18 @@ public class SRPGView extends SurfaceView
         //initialize each array
         touchXcoord = 0;
         touchYcoord = 0;
-        charaXcoord = 0;
-        charaYcoord = 0;
+        charXcoord = 0;
+        charYcoord = 0;
         //画像の読込
         Resources r = context.getResources();                                   //リソースのインスタンス生成
-        map0 = BitmapFactory.decodeResource(r, R.drawable.terrain_flatland);    //Bitmapクラスオブジェクトの生成
-        map1 = BitmapFactory.decodeResource(r, R.drawable.terrain_grass);
-        map2 = BitmapFactory.decodeResource(r, R.drawable.terrain_lake);
-        reimu = BitmapFactory.decodeResource(r, R.drawable.char_reimu);
+        imageFlatland = BitmapFactory.decodeResource(r, R.drawable.terrain_flatland);    //Bitmapクラスオブジェクトの生成
+        imageGrass = BitmapFactory.decodeResource(r, R.drawable.terrain_grass);
+        imageLake = BitmapFactory.decodeResource(r, R.drawable.terrain_lake);
+        imageReimu = BitmapFactory.decodeResource(r, R.drawable.char_reimu);
         //地形情報生成
         generateTerrain(numCellX, numCellY, originX, originY, cellSize, chapter1.MAP, terrain1);
         //キャラクター情報生成
-        Reimu = new Character(20,5,5,0,0,reimu);
+        Reimu = new Character(20,5,5,0,0, imageReimu);
         //scene constant
         NEXT_SCENE = 0;
     }
@@ -246,7 +244,7 @@ public class SRPGView extends SurfaceView
                 Paint paint1 = new Paint();
                 paint1.setTextSize(48);
                 canvas.drawText("Touch:"+ touchXcoord + "," + touchYcoord + "Character:"
-                        + charaXcoord + "," + charaYcoord, 60, 100, paint1);
+                        + charXcoord + "," + charYcoord, 60, 100, paint1);
 
                 for(int i = 0; i< numCellX; i++){
                     for(int j = 0; j< numCellY; j++) {
@@ -255,7 +253,7 @@ public class SRPGView extends SurfaceView
                     }
                 }
                 canvas.drawBitmap(Reimu.characterBitmap, getSrc(Reimu.characterBitmap),
-                        Reimu.getCharaRect(originX, originY, cellSize, Reimu.characterCoordinate[0],Reimu.characterCoordinate[1]),
+                        Reimu.getCharaRect(originX, originY, cellSize, Reimu.charXcoord, Reimu.charYcoord),
                         null);
                 unlock();
                 sleep(600);
@@ -270,7 +268,7 @@ public class SRPGView extends SurfaceView
                 Paint paint1 = new Paint();
                 paint1.setTextSize(48);
                 canvas.drawText("Touch:"+ touchXcoord + "," + touchYcoord + "Character:"
-                        + charaXcoord + "," + charaYcoord, 60, 100, paint1);
+                        + charXcoord + "," + charYcoord, 60, 100, paint1);
                 for(int i = 0; i< numCellX; i++){
                     for(int j = 0; j< numCellY; j++) {
                         canvas.drawBitmap(terrain1[i][j].terrainPicture, getSrc(terrain1[i][j].terrainPicture),
@@ -278,8 +276,7 @@ public class SRPGView extends SurfaceView
                     }
                 }
                 canvas.drawBitmap(Reimu.characterBitmap, getSrc(Reimu.characterBitmap),
-                        Reimu.getCharaRect(originX,originY, cellSize,Reimu.characterCoordinate[0],
-                                Reimu.characterCoordinate[1]), null);
+                        Reimu.getCharaRect(originX,originY, cellSize,Reimu.charXcoord, Reimu.charYcoord), null);
                 unlock();
                 sleep(0);
             }
@@ -304,8 +301,8 @@ public class SRPGView extends SurfaceView
         if(originX<touchX&&touchX< numCellX * cellSize +originX&&originY<touchY&&touchY< numCellY * cellSize +originY) {
             touchXcoord = ((int) touchX - originX) / cellSize;
             touchYcoord = ((int) touchY - originY) / cellSize;
-            charaTouchDistance = Math.abs(touchXcoord - charaXcoord)
-                    + Math.abs(touchYcoord - charaYcoord);
+            charTouchDistance = Math.abs(touchXcoord - charXcoord)
+                    + Math.abs(touchYcoord - charYcoord);
         }
         if(SCENE == SC_OP){
             switch ( event.getAction() ) {
@@ -336,7 +333,7 @@ public class SRPGView extends SurfaceView
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
-                    if(charaTouchDistance == 0 && originX < touchX && touchX < numCellX * cellSize
+                    if(charTouchDistance == 0 && originX < touchX && touchX < numCellX * cellSize
                             + originX&&originY < touchY && touchY < numCellY * cellSize + originY){//todo:ifタッチ箇所==キャラクター
                         NEXT_SCENE = SC_MOVEREADY;
                     }
@@ -362,13 +359,13 @@ public class SRPGView extends SurfaceView
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
-                    if (charaTouchDistance <= Reachable) {//todo:ifタッチ箇所==キャラクター
-                        charaXcoord = touchXcoord;
-                        charaYcoord = touchYcoord;
+                    if (charTouchDistance <= Reachable) {//todo:ifタッチ箇所==キャラクター
+                        charXcoord = touchXcoord;
+                        charYcoord = touchYcoord;
                         moveChara(Reimu, touchXcoord, touchYcoord);
                         NEXT_SCENE = SC_MAP;
                     }
-                    if (charaTouchDistance > Reachable){
+                    if (charTouchDistance > Reachable){
                         NEXT_SCENE = SC_MAP;
                     }
                     break;
