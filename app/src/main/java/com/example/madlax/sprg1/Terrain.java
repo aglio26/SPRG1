@@ -11,18 +11,18 @@ public class Terrain {
     //field variable
     int avoid;
     int moveCost;
-    int[] terrainCoordinate;
+    int terrainXcoord;
+    int terrainYcoord;
     Rect terrainDomain;
     Bitmap terrainPicture;
 
     //constructor
     public Terrain() {
-        terrainCoordinate = new int[2];
         avoid = 0;
         moveCost = 0;
         terrainDomain = new Rect();
-        terrainCoordinate[0]=0;
-        terrainCoordinate[1]=0;
+        terrainXcoord = 0;
+        terrainYcoord = 0;
     }
     //method
     public int getMoveCost(){
@@ -32,10 +32,10 @@ public class Terrain {
         return avoid;
     }
     public int getTerrainCorrdinateX(){
-        return terrainCoordinate[0];
+        return terrainXcoord;
     }
     public int getTerrainCorrdinateY(){
-        return terrainCoordinate[1];
+        return terrainYcoord;
     }
     public Rect getTerrainDomain(){
         return terrainDomain;

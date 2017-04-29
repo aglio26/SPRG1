@@ -15,12 +15,12 @@ public class Character {
     Bitmap characterBitmap;
     Rect characterRect;
     //constructor
-    public Character(int hp, int mp, int ma, int itiX, int itiY, Bitmap bitmap){
+    public Character(int hp, int mp, int ma, int initX, int initY, Bitmap bitmap){
         hitPoint = hp;
         magicPoint = mp;
         MA = ma;
-        charXcoord=itiX;
-        charYcoord=itiY;
+        charXcoord=initX;
+        charYcoord=initY;
         characterBitmap = bitmap;
     }
     public int getCharaHP(){
