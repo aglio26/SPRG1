@@ -7,22 +7,26 @@ import android.graphics.Rect;
  */
 
 public class Character {
+    //変数
     private int hitPoint;
     private int magicPoint;
     private int MA;
     int charXcoord;
     int charYcoord;
-    Bitmap characterBitmap;
-    private Rect characterRect;
-    //constructor
-    public Character(int hp, int mp, int ma, int initX, int initY, Bitmap bitmap){
+    Bitmap charImage;
+    Rect charDomain;
+
+    //コンストラクタ
+    public Character(int hp, int mp, int ma, int initX, int initY, Bitmap image){
         hitPoint = hp;
         magicPoint = mp;
         MA = ma;
-        charXcoord=initX;
-        charYcoord=initY;
-        characterBitmap = bitmap;
+        charXcoord = initX;
+        charYcoord = initY;
+        charImage = image;
     }
+
+    //メソッド
     public int getCharaHP(){
         return hitPoint;
     }
@@ -35,15 +39,15 @@ public class Character {
     public int getCharaY(){
         return charYcoord;
     }
-    public Bitmap getCharacterBitmap(){
-        return characterBitmap;
+    public Bitmap getCharBitmap(){
+        return charImage;
     }
-    public Rect getCharaRect(int originX, int originY, int cellSize, int charCoordX, int charCoordY){
-        characterRect = new Rect();
-        characterRect.left = originX + charCoordX * cellSize;
-        characterRect.top = originY + charCoordY * cellSize;
-        characterRect.right = originX + ( 1 + charCoordX ) * cellSize;
-        characterRect.bottom = originY + ( 1 + charCoordY ) * cellSize;
-        return characterRect;
+    public Rect getCharDomain(int originX, int originY, int cellSize, int charCoordX, int charCoordY){
+        charDomain = new Rect();
+        charDomain.left = originX + charCoordX * cellSize;
+        charDomain.top = originY + charCoordY * cellSize;
+        charDomain.right = originX + ( 1 + charCoordX ) * cellSize;
+        charDomain.bottom = originY + ( 1 + charCoordY ) * cellSize;
+        return charDomain;
     }
 }
