@@ -107,7 +107,7 @@ public class SRPGView extends SurfaceView
                 {0,0,1,1,1,0,0,0,0,0},
                 {0,0,0,0,0,0,0,0,0,0},
                 {0,0,0,0,0,0,0,0,0,0}};
-        Chapter chapter1 = new Chapter(FIELD1);
+        chapter1 = new Chapter(FIELD1);
         numCellX = chapter1.getNumCellX();
         numCellY = chapter1.getNumCellY();
 
@@ -123,8 +123,9 @@ public class SRPGView extends SurfaceView
 
         //描画領域を計算
         drawingDomain = new Rect[numCellX][numCellY];
-        for(int i=0; i < numCellX; i++) {
-            for (int j=0; j < numCellY; j++) {
+        for(int i = 0; i < numCellX; i++) {
+            for (int j = 0; j < numCellY; j++) {
+                drawingDomain[i][j] = new Rect();
                 drawingDomain[i][j].left = originX + i * cellSize;
                 drawingDomain[i][j].top = originY + j * cellSize;
                 drawingDomain[i][j].right = originX + (1 + i) * cellSize;
@@ -145,7 +146,7 @@ public class SRPGView extends SurfaceView
     /**
      *　メソッド
      */
-    //キャラクターの移動（character.javaに置くべきメソッド）
+    //キャラクターの移動（character.javaに置くべきメソッド？）
     public void moveChar(Character character, int idougoX, int idougoY){
         character.charXcoord = idougoX;
         character.charYcoord = idougoY;
@@ -255,8 +256,8 @@ public class SRPGView extends SurfaceView
                 paint1.setTextSize(48);
                 canvas.drawText("Touch:"+ touchXcoord + "," + touchYcoord + "Character:"
                         + charXcoord + "," + charYcoord, 60, 100, paint1);
-                for(int i = 0; i< numCellX; i++){
-                    for(int j = 0; j< numCellY; j++) {
+                for(int i = 0; i < numCellX; i++){
+                    for(int j = 0; j < numCellY; j++) {
                         canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage,
                                 getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
                     }
