@@ -10,6 +10,7 @@ public class Chara {
     int HP;
     int MP;
     int MA;
+    int AttackRange;
     int[] chara_coordinate;
     Bitmap chara_bitmap;
     Rect chara_rect;
