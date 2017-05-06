@@ -42,12 +42,12 @@ public class Character {
     public Bitmap getCharBitmap(){
         return charImage;
     }
-    public Rect getCharDomain(int originX, int originY, int cellSize, int charCoordX, int charCoordY){
+    public Rect getCharDomain(int originX, int originY, int cellSize, int charXcoord, int charYcoord){
         charDomain = new Rect();
-        charDomain.left = originX + charCoordX * cellSize;
-        charDomain.top = originY + charCoordY * cellSize;
-        charDomain.right = originX + ( 1 + charCoordX ) * cellSize;
-        charDomain.bottom = originY + ( 1 + charCoordY ) * cellSize;
+        charDomain.left = originX + charXcoord * cellSize;
+        charDomain.top = originY + charYcoord * cellSize;
+        charDomain.right = originX + ( 1 + charXcoord ) * cellSize;
+        charDomain.bottom = originY + ( 1 + charYcoord ) * cellSize;
         return charDomain;
     }
 }
