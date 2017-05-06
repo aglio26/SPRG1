@@ -93,34 +93,7 @@ public class SRPGView extends SurfaceView
         return Map[coordinate_x][coordinate_y];
     }
     //地形情報生成
-    public void generateTerrain(int n,int m,int originX,int originY,int cell,int chapterMap[][],Terrain terrain[][]){
-        for(int i=0;i<n;i++) {
-            for (int j=0;j<m;j++) {
-                terrain[i][j].Terrain_Coordinate[0] = i;
-                terrain[i][j].Terrain_Coordinate[1] = j;
-                terrain[i][j].Terrain_Domain.left = originX + i * cell;
-                terrain[i][j].Terrain_Domain.top = originY + j * cell;
-                terrain[i][j].Terrain_Domain.right = originX + (1 + i) * cell;
-                terrain[i][j].Terrain_Domain.bottom = originY + (1 + j) * cell;
 
-                if (chapterMap[i][j] == 0) {
-                    terrain[i][j].avoid = 10;
-                    terrain[i][j].move_cost = -1;
-                    terrain[i][j].Terrain_pic = map0;
-                }
-                if (chapterMap[i][j] == 1) {
-                    terrain[i][j].avoid = 10;
-                    terrain[i][j].move_cost = -1;
-                    terrain[i][j].Terrain_pic = map1;
-                }
-                if (chapterMap[i][j] == 2){
-                    terrain[i][j].avoid = 10;
-                    terrain[i][j].move_cost = -1;
-                    terrain[i][j].Terrain_pic = map2;
-                }
-            }
-        }
-    }
     //地形情報初期化
     public void initTerrain(Terrain terrain){
         terrain = new Terrain();
@@ -144,9 +117,7 @@ public class SRPGView extends SurfaceView
         holder = getHolder();
         holder.addCallback(this);
         //get cell number
-        chapter1 = new Chapter(8,10,C1);
-        n = chapter1.getCellnumberX();
-        m = chapter1.getCellnumberY();
+
         //配列の初期化
         Draw_domain = new Rect[n][m];
         Map = new int[n][m];
