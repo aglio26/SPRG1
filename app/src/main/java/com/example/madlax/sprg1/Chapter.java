@@ -1,35 +1,37 @@
 package com.example.madlax.sprg1;
 
+import android.graphics.Rect;
+
 /**
  * Created by madlax on 2017/04/22.
  */
 
 public class Chapter {
 
-    //定数
-    int x_cell;//横方向セル数
-    int y_cell;//縦方向セル数
-    int[][] MAP;
+    //変数
+    private int numCellX;  //横方向セル数
+    private int numCellY;  //縦方向セル数
+    int[][] field;
 
-    //constructor
-    public Chapter(int x, int y, int C[][]) {
-        x_cell = x;
-        y_cell = y;
-        MAP = new int[x_cell][y_cell];
-        for (int i=0;i<x;i++){
-            for(int j=0;j<y;j++){
-                MAP[i][j] = C[i][j];
+    //コンストラクタ
+    public Chapter(int f[][]) {
+        numCellX = f.length;    //二次元配列fの要素数（x要素）
+        numCellY = f[0].length; //二次元配列fの要素数（y要素）
+
+        field = new int[numCellX][numCellY];
+        for (int i=0; i < numCellX; i++){
+            for (int j=0; j < numCellY; j++){
+                field[i][j] = f[i][j];
             }
         }
     }
 
-
-    //method
-    public int getCellnumberX(){
-        return x_cell;
+    //メソッド
+    public int getNumCellX(){
+        return numCellX;
     }
-    public int getCellnumberY(){
-        return y_cell;
+    public int getNumCellY(){
+        return numCellY;
     }
 
 }
