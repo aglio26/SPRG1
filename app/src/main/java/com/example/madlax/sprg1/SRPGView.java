@@ -73,6 +73,7 @@ public class SRPGView extends SurfaceView
     static int SC_MAP = 1;
     static int SC_MOVEREADY = 2;
     static int SC_MOVE = 3;
+    static int SC_ACT = 4;
     static int SC_BATTLE = 5;
     static int SC_GAMEOVER = 9;
 
@@ -266,7 +267,7 @@ public class SRPGView extends SurfaceView
                 canvas.drawText("MOVE_READY",70,50,paint);
                 Paint paint1 = new Paint();
                 paint1.setTextSize(48);
-                canvas.drawText("Touch:"+ touchXcoord + "," + touchYcoord + "Character:"
+                canvas.drawText("Touch:" + touchXcoord + "," + touchYcoord + "Character:"
                         + charXcoord + "," + charYcoord, 60, 100, paint1);
                 for(int i = 0; i < numCellX; i++){
                     for(int j = 0; j < numCellY; j++) {
@@ -302,17 +303,43 @@ public class SRPGView extends SurfaceView
                     }
                 }
                     canvas.drawBitmap(Reimu.charImage, getSrc(Reimu.charImage), charAnime, null);
-                    charAnime.left += dx*1;
-                    charAnime.right += dx*1;
-                    charAnime.top += dy*1;
-                    charAnime.bottom += dy*1;
+                    charAnime.left += dx * 1;
+                    charAnime.right += dx * 1;
+                    charAnime.top += dy * 1;
+                    charAnime.bottom += dy * 1;
                 unlock();
-                if(charAnime.left == originX+cellSize*touchXcoord&&charAnime.top == originY+cellSize*touchYcoord) {
-                   NEXT_SCENE = SC_MAP;
+                if(charAnime.left == originX + cellSize * touchXcoord && charAnime.top == originY + cellSize * touchYcoord) {
+                   NEXT_SCENE = SC_ACT;
                     moveChar(Reimu,touchXcoord,touchYcoord);
-                    canvas.drawText("Anime.left:"+ charAnime.left + "," + "touch:"+","
-                            + (originX+cellSize*touchXcoord)+"SCNE:"+SCENE, 60, 150, paint2);
+                    canvas.drawText("Anime.left:"+ charAnime.left + "," + "touch:" + ","
+                            + (originX + cellSize * touchXcoord) + "SCNE:" + SCENE, 60, 150, paint2);
                 }
+            }
+
+            if (SCENE == SC_ACT) {
+                lock();
+                canvas.drawColor(Color.WHITE);
+                Paint paint = new Paint();
+                paint.setColor(Color.BLUE);
+                paint.setTextSize(48);
+                canvas.drawText("ACT",80,50,paint);
+                Paint paint1 = new Paint();
+                paint1.setTextSize(48);
+                canvas.drawText("Touch:"+ touchXcoord + "," + touchYcoord + "Character:"
+                        + charXcoord + "," + charYcoord, 60, 100, paint1);
+                for(int i = 0; i< numCellX; i++){
+                    for(int j = 0; j< numCellY; j++) {
+                        canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage,
+                                getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
+                    }
+                }
+                canvas.drawBitmap(Reimu.charImage, getSrc(Reimu.charImage),
+                        Reimu.getCharDomain(originX, originY, cellSize, Reimu.charXcoord, Reimu.charYcoord), null);
+                canvas.drawBitmap(Sakuya.charImage, getSrc(Sakuya.charImage),
+                        Sakuya.getCharDomain(originX, originY, cellSize, Sakuya.charXcoord, Sakuya.charYcoord), null);
+                unlock();
+                sleep(600);
+                SCENE = SC_MAP;
             }
 
             if (SCENE == SC_GAMEOVER) {
@@ -418,6 +445,27 @@ public class SRPGView extends SurfaceView
                     //他の要因によってタッチがキャンセルされたときの動作
                     break;
 
+            }
+        }
+        else  if (SCENE == SC_ACT){
+            switch ( event.getAction() ) {
+
+                case MotionEvent.ACTION_DOWN:
+                    //画面がタッチされたときの動作
+                    NEXT_SCENE = SC_MAP;
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    //タッチしたまま移動したときの動作
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    //タッチが離されたときの動作
+                    break;
+
+                case MotionEvent.ACTION_CANCEL:
+                    //他の要因によってタッチがキャンセルされたときの動作
+                    break;
             }
         }
         return true;
