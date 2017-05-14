@@ -45,6 +45,7 @@ public class SRPGView extends SurfaceView
 
     //キャラクター
     Character Reimu;
+    Character Sakuya;
     int Reachable = 4;
 
     //章
@@ -58,6 +59,7 @@ public class SRPGView extends SurfaceView
     private Bitmap imageGrass;
     private Bitmap imageLake;
     public Bitmap imageReimu;
+    public  Bitmap imageSakuya;
 
     //システム
     public SurfaceHolder holder;
@@ -91,6 +93,7 @@ public class SRPGView extends SurfaceView
         imageGrass = BitmapFactory.decodeResource(r, R.drawable.terrain_grass);
         imageLake = BitmapFactory.decodeResource(r, R.drawable.terrain_lake);
         imageReimu = BitmapFactory.decodeResource(r, R.drawable.char_reimu);
+        imageSakuya = BitmapFactory.decodeResource(r, R.drawable.char_sakuya);
 
         //地形情報生成
         terrain[0] = new Terrain(0, -1, imageFlatland);
@@ -99,6 +102,7 @@ public class SRPGView extends SurfaceView
 
         //キャラクター情報生成
         Reimu = new Character(20, 5, 5, 0, 0, imageReimu);
+        Sakuya = new Character(20, 5, 5, 3, 0, imageSakuya);
 
         //1章情報生成
         int[][] FIELD1 = {
@@ -248,6 +252,8 @@ public class SRPGView extends SurfaceView
                 }
                 canvas.drawBitmap(Reimu.charImage, getSrc(Reimu.charImage),
                         Reimu.getCharDomain(originX, originY, cellSize, Reimu.charXcoord, Reimu.charYcoord), null);
+                canvas.drawBitmap(Sakuya.charImage, getSrc(Sakuya.charImage),
+                        Sakuya.getCharDomain(originX, originY, cellSize, Sakuya.charXcoord, Sakuya.charYcoord), null);
                 unlock();
                 sleep(600);
             }
