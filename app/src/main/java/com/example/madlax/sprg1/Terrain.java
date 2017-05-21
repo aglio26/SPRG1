@@ -23,10 +23,10 @@ public class Terrain {
     public int getMoveCost(){
         return moveCost;
     }
-    public int getAvoidance(){
+    public int getAvoidance() {
         return avoidance;
     }
-    public Bitmap getTerrainImage(){
+    public Bitmap getTerrainImage() {
         return terrainImage;
     }
 }

@@ -14,6 +14,7 @@ import android.view.MotionEvent;
 import android.graphics.Paint;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import java.util.Random;
 
 /**
  * Created by madlax on 2017/03/27.
@@ -108,8 +109,8 @@ public class SRPGView extends SurfaceView
         ironSword = new Weapon(5, 90, 0, 1);
 
         //キャラクター情報生成
-        Reimu = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 5, 0, 0, imageReimu);
-        Sakuya = new Character(1, 20, 5, 5, 5, 5, 5, 5, 5, 5, 3, 0, imageSakuya);
+        Reimu = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 5, 0, 0, imageReimu, ironSword);
+        Sakuya = new Character(1, 20, 5, 5, 5, 5, 5, 5, 5, 5, 3, 0, imageSakuya, ironSword);
 
         //1章情報生成
         int[][] FIELD1 = {
@@ -235,8 +236,8 @@ public class SRPGView extends SurfaceView
                     }
                 }
                 Paint paint4 = new Paint();
-                paint2.setColor(Color.BLUE);
-                paint2.setTextSize(48);
+                paint4.setColor(Color.BLUE);
+                paint4.setTextSize(48);
                 canvas.drawText("cellX:"+ touchXcoord + "cellY:" + touchYcoord, 50, 200, paint);
                 unlock();
                 sleep(0);
@@ -352,6 +353,26 @@ public class SRPGView extends SurfaceView
                     Paint paint2 = new Paint();
                     paint2.setTextSize(48);
                     canvas.drawText("Attack:", 80, 150, paint2);
+                    int hit1;
+                    hit1 = Reimu.getHitRate() - Sakuya.getAvoid();
+                    int dmg1;
+                    dmg1 = Reimu.getAttackPower() - Sakuya.getDeffencePower();
+                    int crt1;
+                    crt1 = Reimu.getCritical() - Sakuya.getDodge();
+                    Paint paint3 = new Paint();
+                    paint3.setTextSize(48);
+                    canvas.drawText("Reimu    HP:" + Reimu.getHitPoint() + " HIT:" + hit1 + " DMG:" + dmg1
+                            + " CRT:" + crt1, 80, 200, paint3);
+                    int hit2;
+                    hit2 = Sakuya.getHitRate() - Reimu.getAvoid();
+                    int dmg2;
+                    dmg2 = Sakuya.getAttackPower() - Reimu.getDeffencePower();
+                    int crt2;
+                    crt2 = Sakuya.getCritical() - Reimu.getDodge();
+                    Paint paint4 = new Paint();
+                    paint4.setTextSize(48);
+                    canvas.drawText("Sakuya  HP:"+ Sakuya.getHitPoint() + " HIT:" + hit2 + " DMG:" + dmg2
+                            + " CRT:" + crt2, 80, 250, paint4);
                 }
                 unlock();
                 sleep(600);
@@ -359,19 +380,42 @@ public class SRPGView extends SurfaceView
 
             if (SCENE == SC_BATTLE) {
                 lock();
-                canvas.drawColor(Color.WHITE);
-                Paint paint = new Paint();
-                paint.setColor(Color.BLUE);
-                paint.setTextSize(48);
-                canvas.drawText("BATTLE",80,50,paint);
+                Random rand = new Random();
                 Paint paint1 = new Paint();
+                canvas.drawColor(Color.WHITE);
                 paint1.setTextSize(48);
-                canvas.drawText("Reimu:" + Reimu.getCharaHP(), 80, 100, paint1);
                 Paint paint2 = new Paint();
                 paint2.setTextSize(48);
-                canvas.drawText("Sakuya:"+ Sakuya.getCharaHP(), 80, 150, paint2);
+                if (Reimu.getHitRate() - Sakuya.getAvoid() >= rand.nextInt(100)) {
+                    int damage;
+                    damage = Math.max(Reimu.getAttackPower() - Sakuya.getDeffencePower(), 0);
+                    Sakuya.setHitPoint(Sakuya.getHitPoint() - damage);
+                    canvas.drawText("Reimu -> Sakuya: HIT!  Sakuya:" + Sakuya.getHitPoint(), 80, 200, paint1);
+                }
+                else{
+                    canvas.drawText("Reimu -> Sakuya: MISS! Sakuya:" + Sakuya.getHitPoint(), 80, 200, paint1);
+                }
+                if (Sakuya.getHitRate() - Reimu.getAvoid() >= rand.nextInt(100)) {
+                    int damage;
+                    damage = Math.max(Sakuya.getAttackPower() - Reimu.getDeffencePower(), 0);
+                    Reimu.setHitPoint(Reimu.getHitPoint() - damage);
+                    canvas.drawText("Sakuya -> Reimu: HIT!  Reimu:" + Reimu.getHitPoint(), 80, 250, paint2);
+                }
+                else{
+                    canvas.drawText("Sakuya -> Reimu: MISS! Reimu:" + Reimu.getHitPoint(), 80, 250, paint2);
+                }
+                Paint paint3 = new Paint();
+                paint3.setColor(Color.BLUE);
+                paint3.setTextSize(48);
+                canvas.drawText("BATTLE", 80, 100, paint3);
                 unlock();
-                sleep(0);
+                sleep(2400);
+                if(Reimu.getHitPoint() <= 0 ) {
+                    NEXT_SCENE = SC_GAMEOVER;
+                }
+                else{
+                    NEXT_SCENE = SC_MAP;
+                }
             }
 
             if (SCENE == SC_GAMEOVER) {
@@ -389,7 +433,7 @@ public class SRPGView extends SurfaceView
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent (MotionEvent event) {
         touchX = event.getX();//端末ディスプレイ座標取得
         touchY = event.getY();
         if(originX < touchX && touchX < numCellX * cellSize + originX && originY < touchY
@@ -428,7 +472,7 @@ public class SRPGView extends SurfaceView
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
                     if(charTouchDistance == 0 && originX < touchX && touchX < numCellX * cellSize
-                            + originX && originY < touchY && touchY < numCellY * cellSize + originY){//todo:ifタッチ箇所==キャラクター
+                            + originX && originY < touchY && touchY < numCellY * cellSize + originY){
                         NEXT_SCENE = SC_MOVEREADY;
                     }
                     break;
@@ -511,7 +555,27 @@ public class SRPGView extends SurfaceView
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
-                    NEXT_SCENE = SC_MAP;
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    //タッチしたまま移動したときの動作
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    //タッチが離されたときの動作
+                    break;
+
+                case MotionEvent.ACTION_CANCEL:
+                    //他の要因によってタッチがキャンセルされたときの動作
+                    break;
+            }
+        }
+        else if(SCENE == SC_GAMEOVER){
+            switch ( event.getAction() ) {
+
+                case MotionEvent.ACTION_DOWN:
+                    //画面がタッチされたときの動作
+                    NEXT_SCENE = SC_OP;
                     break;
 
                 case MotionEvent.ACTION_MOVE:

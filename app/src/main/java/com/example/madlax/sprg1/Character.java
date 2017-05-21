@@ -7,7 +7,6 @@ import android.graphics.Rect;
  */
 
 public class Character {
-    //変数
     private int level;      //レベル
     private int hitPoint;   //HP
     private int strength;   //力
@@ -18,24 +17,22 @@ public class Character {
     private int deffence;   //守備
     private int resistance; //魔防
     private int movement;   //移動
-    private int attack;     //攻撃
-    private int hitRate;    //命中
-    private int avoid;      //回避
-    private int critical;   //必殺
-    private int dodge;      //必殺回避
+
     int charXcoord;
     int charYcoord;
     Bitmap charImage;
     Rect charDomain;
 
+    private Weapon equipment;   //装備
+
     //コンストラクタ
-    public Character(int lv, int hp, int str, int mag, int ski, int spd, int lck, int def, int res,
-                     int move, int initX, int initY, Bitmap image){
+    public Character(int lv, int hp, int str, int mag, int skl, int spd, int lck, int def, int res,
+                     int move, int initX, int initY, Bitmap image, Weapon initWeapon){
         level = lv;
         hitPoint = hp;
         strength = str;
         magic = mag;
-        skill = ski;
+        skill = skl;
         speed = spd;
         luck = lck;
         deffence = def;
@@ -44,10 +41,11 @@ public class Character {
         charXcoord = initX;
         charYcoord = initY;
         charImage = image;
+        equipment = initWeapon;
     }
 
     //メソッド
-    public int getCharaHP(){
+    public int getHitPoint(){
         return hitPoint;
     }
     public int getCharaX(){
@@ -66,5 +64,27 @@ public class Character {
         charDomain.right = originX + ( 1 + charXcoord ) * cellSize;
         charDomain.bottom = originY + ( 1 + charYcoord ) * cellSize;
         return charDomain;
+    }
+    public int getAttackPower() {
+        return strength + equipment.getMight();
+    }
+    public int getDeffencePower() {
+        return deffence;
+    }
+    public int getHitRate() {
+        return  skill * 2 + luck + equipment.getHitRate();
+    }
+    public int getAvoid() {
+        return speed * 2 + luck;
+    }
+    public int getCritical() {
+        return skill / 2 + equipment.getCriticalRate();
+    }
+    public int getDodge() {
+        return luck;
+    }
+
+    public void setHitPoint(int hp) {
+        hitPoint = hp;
     }
 }
