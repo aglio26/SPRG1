@@ -8,19 +8,39 @@ import android.graphics.Rect;
 
 public class Character {
     //変数
-    private int hitPoint;
-    private int magicPoint;
-    private int MA;
+    private int level;      //レベル
+    private int hitPoint;   //HP
+    private int strength;   //力
+    private int magic;      //魔力
+    private int skill;      //技
+    private int speed;      //速さ
+    private int luck;       //幸運
+    private int deffence;   //守備
+    private int resistance; //魔防
+    private int movement;   //移動
+    private int attack;     //攻撃
+    private int hitRate;    //命中
+    private int avoid;      //回避
+    private int critical;   //必殺
+    private int dodge;      //必殺回避
     int charXcoord;
     int charYcoord;
     Bitmap charImage;
     Rect charDomain;
 
     //コンストラクタ
-    public Character(int hp, int mp, int ma, int initX, int initY, Bitmap image){
+    public Character(int lv, int hp, int str, int mag, int ski, int spd, int lck, int def, int res,
+                     int move, int initX, int initY, Bitmap image){
+        level = lv;
         hitPoint = hp;
-        magicPoint = mp;
-        MA = ma;
+        strength = str;
+        magic = mag;
+        skill = ski;
+        speed = spd;
+        luck = lck;
+        deffence = def;
+        resistance = res;
+        movement = move;
         charXcoord = initX;
         charYcoord = initY;
         charImage = image;
@@ -29,9 +49,6 @@ public class Character {
     //メソッド
     public int getCharaHP(){
         return hitPoint;
-    }
-    public int getCharaMP(){
-        return magicPoint;
     }
     public int getCharaX(){
         return charXcoord;
