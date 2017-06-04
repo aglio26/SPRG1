@@ -14,7 +14,7 @@ public class Character {
     private int skill;      //技
     private int speed;      //速さ
     private int luck;       //幸運
-    private int deffence;   //守備
+    private int defence;   //守備
     private int resistance; //魔防
     private int movement;   //移動
 
@@ -35,7 +35,7 @@ public class Character {
         skill = skl;
         speed = spd;
         luck = lck;
-        deffence = def;
+        defence = def;
         resistance = res;
         movement = move;
         charXcoord = initX;
@@ -69,7 +69,7 @@ public class Character {
         return strength + equipment.getMight();
     }
     public int getDeffencePower() {
-        return deffence;
+        return defence;
     }
     public int getHitRate() {
         return  skill * 2 + luck + equipment.getHitRate();
