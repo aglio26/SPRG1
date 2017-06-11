@@ -54,6 +54,7 @@ public class Character {
     public int getCharaY(){
         return charYcoord;
     }
+    public int getMovement(){return movement;}
     public Bitmap getCharBitmap(){
         return charImage;
     }
