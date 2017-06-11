@@ -1,7 +1,9 @@
 package com.example.madlax.sprg1;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-
+import com.example.madlax.sprg1.Cell;
+import com.example.madlax.sprg1.Chapter;
+import com.example.madlax.sprg1.Terrain;
 /**
  * Created by madlax on 2017/04/23.
  */
@@ -17,6 +19,7 @@ public class Character {
     private int defence;   //守備
     private int resistance; //魔防
     private int movement;   //移動
+    public Cell[][] cell;  //移動情報
 
     int charXcoord;
     int charYcoord;
@@ -27,7 +30,7 @@ public class Character {
 
     //コンストラクタ
     public Character(int lv, int hp, int str, int mag, int skl, int spd, int lck, int def, int res,
-                     int move, int initX, int initY, Bitmap image, Weapon initWeapon){
+                     int move, int initX, int initY, Bitmap image, Weapon initWeapon, Chapter chapter){
         level = lv;
         hitPoint = hp;
         strength = str;
@@ -42,6 +45,12 @@ public class Character {
         charYcoord = initY;
         charImage = image;
         equipment = initWeapon;
+        cell = new Cell[chapter.getNumCellX()][chapter.getNumCellY()];
+        for(int i=0;i<chapter.getNumCellX();i++){
+            for(int j=0;j<chapter.getNumCellY();j++){
+                cell[i][j] = new Cell();
+            }
+        }
     }
 
     //メソッド
@@ -84,8 +93,15 @@ public class Character {
     public int getDodge() {
         return luck;
     }
-
     public void setHitPoint(int hp) {
         hitPoint = hp;
+    }
+    //cellのリセット
+    public void resetCell(Chapter chapter){
+        for(int i=0;i<chapter.getNumCellX();i++){
+            for(int j=0;j<chapter.getNumCellY();j++){
+                cell[i][j]=new Cell();
+            }
+        }
     }
 }

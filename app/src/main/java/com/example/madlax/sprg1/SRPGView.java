@@ -40,17 +40,13 @@ public class SRPGView extends SurfaceView
     Rect charAnime;
     int dx;
     int dy;
-    int tansakusyuuryou;
     //地形情報
     Terrain[] terrain = new Terrain[3];
     Rect[][] drawingDomain;//描画領域
-    Cell[][] Reimucell; //移動情報
-    Cell[][] Sakuyacell;
 
     //キャラクター
     Character Reimu;
     Character Sakuya;
-    int Reachable = 4;
 
     //武器
     Weapon ironSword;
@@ -123,7 +119,6 @@ public class SRPGView extends SurfaceView
         //武器情報生成
         ironSword = new Weapon(5, 90, 0, 1);
 
-        ;
 
         //1章情報生成
         int[][] FIELD1 = {
@@ -139,14 +134,9 @@ public class SRPGView extends SurfaceView
         numCellX = chapter1.getNumCellX();
         numCellY = chapter1.getNumCellY();
         //キャラクター情報生成
-        Reimu = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 5, 0, 0, imageReimu, ironSword);
-        Sakuya = new Character(1, 20, 5, 5, 5, 5, 5, 5, 5, 5, 3, 0, imageSakuya, ironSword);
-        Reimucell = new Cell[numCellX][numCellY];
-        for(int i=0;i<numCellX;i++){
-            for(int j=0;j<numCellY;j++){
-                Reimucell[i][j] = new Cell();
-            }
-        }
+        Reimu = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 5, 0, 0, imageReimu, ironSword,chapter1);
+        Sakuya = new Character(1, 20, 5, 5, 5, 5, 5, 5, 5, 5, 3, 0, imageSakuya, ironSword,chapter1);
+
         //セルのサイズ、原点を計算
         Display display = ((Activity)context).getWindowManager().getDefaultDisplay();
         Point p = new Point();
@@ -189,7 +179,23 @@ public class SRPGView extends SurfaceView
         character.charXcoord = idougoX;
         character.charYcoord = idougoY;
     }
-
+    //対象キャラクターの移動情報書き込み
+    public void judgeCell(Character character,Chapter chapter,Terrain[] terrain){
+        int tansakusyuuryou=0;
+        character.cell[character.getCharaX()][character.getCharaY()].tansakuyotei = true;
+        character.cell[character.getCharaX()][character.getCharaY()].moveVariable = character.getMovement();
+        while(tansakusyuuryou==0) {
+            tansakusyuuryou = 1;
+            for (int i = 0; i < chapter.getNumCellX(); i++) {
+                for (int j = 0; j < chapter.getNumCellY(); j++) {
+                    if(character.cell[i][j].tansakuyotei==true){
+                        character.cell[i][j].writecell(i,j,character.cell,chapter,terrain);
+                        tansakusyuuryou = 0;
+                    }
+                }
+            }
+        }
+    }
 
     //画像の描画元領域の取得
     public Rect getSrc(Bitmap bitmap){
@@ -199,71 +205,6 @@ public class SRPGView extends SurfaceView
         src.left = 0;
         src.top = 0;
         return src;
-    }
-    //移動情報系関数
-    //周囲4マスの移動情報書き込み
-    public void writecell(int i,int j,Cell cell[][]){
-        //自マスの処理
-        cell[i][j].tansakuyotei = false;
-        cell[i][j].tansakuzumi = true;
-        //周囲4マスの処理
-        if(i<numCellX-1) {
-            if (cell[i+1][j].tansakuzumi==false) {
-                cell[i+1][j].movevariable = cell[i][j].movevariable - terrain[chapter1.field[i+1][j]].moveCost;
-                if (cell[i+1][j].movevariable > 0) {
-                    cell[i+1][j].tansakuyotei = true;
-                }
-            }
-        }
-        if(j<numCellY-1){
-            if(cell[i][j+1].tansakuzumi==false)
-                {cell[i][j+1].movevariable = cell[i][j].movevariable-terrain[chapter1.field[i][j+1]].moveCost;
-                if(cell[i][j+1].movevariable>0){
-                    cell[i][j+1].tansakuyotei = true;
-                }
-            }
-        }
-        if(i>0) {
-            if (cell[i-1][j].tansakuzumi==false) {
-                cell[i-1][j].movevariable = cell[i][j].movevariable - terrain[chapter1.field[i-1][j]].moveCost;
-                if (cell[i-1][j].movevariable > 0) {
-                    cell[i-1][j].tansakuyotei = true;
-                }
-            }
-        }
-        if(j>0) {
-            if (cell[i][j - 1].tansakuzumi==false) {
-                cell[i][j - 1].movevariable = cell[i][j].movevariable - terrain[chapter1.field[i][j - 1]].moveCost;
-                if (cell[i][j - 1].movevariable > 0) {
-                    cell[i][j - 1].tansakuyotei = true;
-                }
-            }
-        }
-    }
-    //対象キャラクターの移動情報書き込み
-    public void judgeCell(Cell cell[][],Character character,Chapter chapter){
-            tansakusyuuryou=0;
-            cell[character.getCharaX()][character.getCharaY()].tansakuyotei = true;
-            cell[character.getCharaX()][character.getCharaY()].movevariable = character.getMovement();
-        while(tansakusyuuryou==0) {
-            tansakusyuuryou = 1;
-            for (int i = 0; i < chapter.getNumCellX()-1; i++) {
-                for (int j = 0; j < chapter.getNumCellY()-1; j++) {
-                    if(cell[i][j].tansakuyotei==true){
-                        writecell(i,j,cell);
-                        tansakusyuuryou = 0;
-                    }
-                }
-            }
-        }
-    }
-    //cellのリセット
-    public void resetCell(Cell cell[][],Chapter chapter){
-        for(int i=0;i<numCellX;i++){
-            for(int j=0;j<numCellY;j++){
-                cell[i][j]=new Cell();
-            }
-        }
     }
 
 
@@ -354,7 +295,7 @@ public class SRPGView extends SurfaceView
                 sleep(600);
             }
             if (SCENE == SC_MOVEREADY) {// todo:移動可能領域の取得、及び領域の描画の実装　
-                judgeCell(Reimucell,Reimu,chapter1);
+                judgeCell(Reimu,chapter1,terrain);
                 lock();
                 canvas.drawColor(Color.WHITE);
                 Paint paint = new Paint();
@@ -369,11 +310,11 @@ public class SRPGView extends SurfaceView
                     for(int j = 0; j < numCellY; j++) {
                         canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage,
                                 getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
-                        if(Reimucell[i][j].movevariable>0){
+                        if(Reimu.cell[i][j].moveVariable >0){
                             canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage_blue,
                                     getSrc(terrain[chapter1.field[i][j]].terrainImage_blue), drawingDomain[i][j], null);
                         }
-                        if(Reimucell[i][j].movevariable==0){
+                        if(Reimu.cell[i][j].moveVariable ==0){
                             canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage_red,
                                     getSrc(terrain[chapter1.field[i][j]].terrainImage_red), drawingDomain[i][j], null);
                         }
@@ -387,7 +328,7 @@ public class SRPGView extends SurfaceView
                 sleep(0);
             }
             if(SCENE == SC_MOVE){
-                resetCell(Reimucell,chapter1);
+                Reimu.resetCell(chapter1);
                 lock();
                 canvas.drawColor(Color.WHITE);
                 Paint paint = new Paint();
@@ -594,7 +535,7 @@ public class SRPGView extends SurfaceView
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
-                    if (Reimucell[touchXcoord][touchYcoord].movevariable > 0) {//todo:ifタッチ箇所==キャラクター
+                    if (Reimu.cell[touchXcoord][touchYcoord].moveVariable > 0) {//todo:ifタッチ箇所==キャラクター
                         charXcoord = touchXcoord;
                         charYcoord = touchYcoord;
                         charAnime = Reimu.getCharDomain(originX, originY, cellSize, Reimu.charXcoord, Reimu.charYcoord);
@@ -602,7 +543,7 @@ public class SRPGView extends SurfaceView
                         dy = ((originY + cellSize * touchYcoord) - (originY + cellSize * Reimu.charYcoord));
                         NEXT_SCENE = SC_MOVE;
                     }
-                    if (Reimucell[touchXcoord][touchYcoord].movevariable <= 0){
+                    if (Reimu.cell[touchXcoord][touchYcoord].moveVariable <= 0){
                         NEXT_SCENE = SC_MAP;
                     }
                     break;

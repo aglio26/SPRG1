@@ -1,6 +1,6 @@
 package com.example.madlax.sprg1;
-
 import android.graphics.Bitmap;
+
 
 /**
  * Created by madlax on 2017/04/22.
