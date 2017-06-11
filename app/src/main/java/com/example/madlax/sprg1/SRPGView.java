@@ -79,6 +79,7 @@ public class SRPGView extends SurfaceView
     static int SC_MOVE = 3;
     static int SC_ACT = 4;
     static int SC_BATTLE = 5;
+    static int SC_CLEAR = 6;
     static int SC_GAMEOVER = 9;
 
     /**
@@ -395,7 +396,7 @@ public class SRPGView extends SurfaceView
                 else{
                     canvas.drawText("Reimu -> Sakuya: MISS! Sakuya:" + Sakuya.getHitPoint(), 80, 200, paint1);
                 }
-                if (Sakuya.getHitRate() - Reimu.getAvoid() >= rand.nextInt(100)) {
+                if (Sakuya.getHitPoint() > 0 && Sakuya.getHitRate() - Reimu.getAvoid() >= rand.nextInt(100)) {
                     int damage;
                     damage = Math.max(Sakuya.getAttackPower() - Reimu.getDeffencePower(), 0);
                     Reimu.setHitPoint(Reimu.getHitPoint() - damage);
@@ -413,11 +414,24 @@ public class SRPGView extends SurfaceView
                 if(Reimu.getHitPoint() <= 0 ) {
                     NEXT_SCENE = SC_GAMEOVER;
                 }
+                else if(Sakuya.getHitPoint() <= 0){
+                    NEXT_SCENE = SC_CLEAR;
+                }
                 else{
                     NEXT_SCENE = SC_MAP;
                 }
             }
-
+            if (SCENE == SC_CLEAR) {
+                lock();
+                canvas.drawColor(Color.WHITE);
+                Paint paint = new Paint();
+                paint.setColor(Color.BLUE);
+                paint.setTextSize(48);
+                canvas.drawText("CLEAR",80,50,paint);
+                unlock();
+                sleep(0);
+                SCENE = SC_OP;
+            }
             if (SCENE == SC_GAMEOVER) {
                 lock();
                 canvas.drawColor(Color.WHITE);
@@ -555,6 +569,27 @@ public class SRPGView extends SurfaceView
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    //タッチしたまま移動したときの動作
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    //タッチが離されたときの動作
+                    break;
+
+                case MotionEvent.ACTION_CANCEL:
+                    //他の要因によってタッチがキャンセルされたときの動作
+                    break;
+            }
+        }
+        else if(SCENE == SC_CLEAR){
+            switch ( event.getAction() ) {
+
+                case MotionEvent.ACTION_DOWN:
+                    //画面がタッチされたときの動作
+                    NEXT_SCENE = SC_OP;
                     break;
 
                 case MotionEvent.ACTION_MOVE:
