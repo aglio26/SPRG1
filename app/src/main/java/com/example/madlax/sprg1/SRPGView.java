@@ -19,7 +19,7 @@ import java.util.Random;
 /**
  * Created by madlax on 2017/03/27.
  */
-
+//comment from lab 6/14
 public class SRPGView extends SurfaceView
         implements SurfaceHolder.Callback, Runnable {
     //フィールド変数
