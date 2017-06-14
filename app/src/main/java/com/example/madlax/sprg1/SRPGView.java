@@ -187,10 +187,10 @@ public class SRPGView extends SurfaceView
         character.cell[character.getCharaX()][character.getCharaY()].moveVariable = character.getMovement();
         while(tansakusyuuryou==0) {
             tansakusyuuryou = 1;
-            for (int i = 0; i < chapter.getNumCellX(); i++) {
-                for (int j = 0; j < chapter.getNumCellY(); j++) {
+            for (int i = 0; i < chapter.getNumCellX()-1; i++) {
+                for (int j = 0; j < chapter.getNumCellY()-1; j++) {
                     if(character.cell[i][j].tansakuyotei==true){
-                        character.cell[i][j].writecell(i,j,character.cell,chapter,terrain);
+                        character.cell[i][j].writeCell(i,j,character.cell,chapter,terrain);
                         tansakusyuuryou = 0;
                     }
                 }

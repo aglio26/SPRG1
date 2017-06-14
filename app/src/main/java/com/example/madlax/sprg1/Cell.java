@@ -16,7 +16,7 @@ public class Cell {
         moveVariable = -5;
     }
     //メソッド
-    public void writecell(int i,int j,Cell cell[][],Chapter chapter,Terrain[] terrain){
+    public void writeCell(int i, int j, Cell cell[][], Chapter chapter, Terrain[] terrain){
         //自マスの処理
         cell[i][j].tansakuyotei = false;
         cell[i][j].tansakuzumi = true;
