@@ -36,7 +36,7 @@ public class SRPGView extends SurfaceView
     int touchYcoord;    //タッチしたセルの座標Y
     int charXcoord;     //キャラクターの座標X
     int charYcoord;     //キャラクターの座標Y
-    int charTouchDistance;
+    int charTouchDistance=0;
     Rect charAnime;
     int dx;
     int dy;
@@ -182,16 +182,15 @@ public class SRPGView extends SurfaceView
     }
     //対象キャラクターの移動情報書き込み
     public void judgeCell(Character character,Chapter chapter,Terrain[] terrain){
-        int tansakusyuuryou=0;
-        character.cell[character.getCharaX()][character.getCharaY()].tansakuyotei = true;
+        boolean loop=true;
+        character.cell[character.getCharaX()][character.getCharaY()].tansakuzumi = true;
         character.cell[character.getCharaX()][character.getCharaY()].moveVariable = character.getMovement();
-        while(tansakusyuuryou==0) {
-            tansakusyuuryou = 1;
+        while(loop==true) {
+            loop = false;
             for (int i = 0; i < chapter.getNumCellX(); i++) {
                 for (int j = 0; j < chapter.getNumCellY(); j++) {
-                    if(character.cell[i][j].tansakuyotei==true){
-                        character.cell[i][j].writecell(i,j,character.cell,chapter,terrain);
-                        tansakusyuuryou = 0;
+                    if(character.cell[i][j].tansakuzumi==true){
+                        character.cell[i][j].writecell(i,j,character.cell,chapter,terrain,loop);
                     }
                 }
             }
@@ -277,7 +276,7 @@ public class SRPGView extends SurfaceView
                 Paint paint = new Paint();
                 paint.setColor(Color.BLUE);
                 paint.setTextSize(48);
-                canvas.drawText("field", 60, 50, paint);
+                canvas.drawText("SC_MAP", 60, 50, paint);
                 Paint paint1 = new Paint();
                 paint1.setTextSize(48);
                 canvas.drawText("Touch:"+ touchXcoord + "," + touchYcoord + "Character:"
