@@ -60,13 +60,10 @@ public class SRPGView extends SurfaceView
     //MapConstant
     private Bitmap imageFlatland;
     private Bitmap imageFlatland_blue;
-    private Bitmap imageFlatland_red;
     private Bitmap imageGrass;
     private Bitmap imageGrass_blue;
-    private Bitmap imageGrass_red;
     private Bitmap imageLake;
     private Bitmap imageLake_blue;
-    private Bitmap imageLake_red;
     public Bitmap imageReimu;
     public  Bitmap imageSakuya;
 
@@ -102,20 +99,17 @@ public class SRPGView extends SurfaceView
         //Bitmapクラスオブジェクトの生成
         imageFlatland = BitmapFactory.decodeResource(r, R.drawable.terrain_flatland);
         imageFlatland_blue = BitmapFactory.decodeResource(r, R.drawable.terrain_flatland_blue);
-        imageFlatland_red = BitmapFactory.decodeResource(r, R.drawable.terrain_flatland_red);
         imageGrass = BitmapFactory.decodeResource(r, R.drawable.terrain_grass);
         imageGrass_blue = BitmapFactory.decodeResource(r, R.drawable.terrain_grass_blue);
-        imageGrass_red = BitmapFactory.decodeResource(r, R.drawable.terrain_grass_red);
         imageLake = BitmapFactory.decodeResource(r, R.drawable.terrain_lake);
         imageLake_blue =BitmapFactory.decodeResource(r, R.drawable.terrain_lake_blue);
-        imageLake_red =BitmapFactory.decodeResource(r, R.drawable.terrain_lake_red);
         imageReimu = BitmapFactory.decodeResource(r, R.drawable.char_reimu);
         imageSakuya = BitmapFactory.decodeResource(r, R.drawable.char_sakuya);
 
         //地形情報生成
-        terrain[0] = new Terrain(0, 1, imageFlatland,imageFlatland_blue,imageFlatland_red);
-        terrain[1] = new Terrain(10, 2, imageGrass,imageGrass_blue,imageGrass_red);
-        terrain[2] = new Terrain(10, 99, imageLake,imageLake_blue,imageLake_red);
+        terrain[0] = new Terrain(0, 1, imageFlatland,imageFlatland_blue);
+        terrain[1] = new Terrain(10, 2, imageGrass,imageGrass_blue);
+        terrain[2] = new Terrain(10, 99, imageLake,imageLake_blue);
 
         //武器情報生成
         ironSword = new Weapon(5, 90, 0, 1);
@@ -187,8 +181,8 @@ public class SRPGView extends SurfaceView
         character.cell[character.getCharaX()][character.getCharaY()].moveVariable = character.getMovement();
         while(tansakusyuuryou==0) {
             tansakusyuuryou = 1;
-            for (int i = 0; i < chapter.getNumCellX()-1; i++) {
-                for (int j = 0; j < chapter.getNumCellY()-1; j++) {
+            for (int i = 0; i <= chapter.getNumCellX()-1; i++) {
+                for (int j = 0; j <= chapter.getNumCellY()-1; j++) {
                     if(character.cell[i][j].tansakuyotei==true){
                         character.cell[i][j].writeCell(i,j,character.cell,chapter,terrain);
                         tansakusyuuryou = 0;
@@ -311,13 +305,9 @@ public class SRPGView extends SurfaceView
                     for(int j = 0; j < numCellY; j++) {
                         canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage,
                                 getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
-                        if(Reimu.cell[i][j].moveVariable >0){
+                        if(Reimu.cell[i][j].moveVariable > 0){
                             canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage_blue,
                                     getSrc(terrain[chapter1.field[i][j]].terrainImage_blue), drawingDomain[i][j], null);
-                        }
-                        if(Reimu.cell[i][j].moveVariable ==0){
-                            canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage_red,
-                                    getSrc(terrain[chapter1.field[i][j]].terrainImage_red), drawingDomain[i][j], null);
                         }
                     }
                 }
