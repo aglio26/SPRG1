@@ -71,6 +71,7 @@ public class SRPGView extends SurfaceView
     public Bitmap imageReimu;
     public Bitmap imageMarisa;
     public Bitmap imageSakuya;
+    public Bitmap imageStatus;
 
     //システム
     public SurfaceHolder holder;
@@ -115,6 +116,7 @@ public class SRPGView extends SurfaceView
         imageReimu = BitmapFactory.decodeResource(r, R.drawable.char_reimu);
         imageMarisa = BitmapFactory.decodeResource(r, R.drawable.char_marisa);
         imageSakuya = BitmapFactory.decodeResource(r, R.drawable.char_sakuya);
+        imageStatus = BitmapFactory.decodeResource(r, R.drawable.status);
 
         //地形情報生成
         terrain[0] = new Terrain(0, 1, imageFlatland,imageFlatland_blue,imageFlatland_red);
@@ -469,6 +471,12 @@ public class SRPGView extends SurfaceView
                 paint.setColor(Color.BLUE);
                 paint.setTextSize(48);
                 canvas.drawText("CLEAR",80,50,paint);
+                Rect dst = new Rect();
+                dst.left = originX;
+                dst.top = originY;
+                dst.right = originX + cellSize * numCellX;
+                dst.bottom = originY + cellSize * numCellY;
+                canvas.drawBitmap(imageStatus, getSrc(imageStatus), dst, null);
                 unlock();
                 sleep(0);
                 SCENE = SC_OP;
