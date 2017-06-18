@@ -46,6 +46,7 @@ public class SRPGView extends SurfaceView
 
     //キャラクター
     Character Reimu;
+    Character Marisa;
     Character Sakuya;
 
     //武器
@@ -68,7 +69,8 @@ public class SRPGView extends SurfaceView
     private Bitmap imageLake_blue;
     private Bitmap imageLake_red;
     public Bitmap imageReimu;
-    public  Bitmap imageSakuya;
+    public Bitmap imageMarisa;
+    public Bitmap imageSakuya;
 
     //システム
     public SurfaceHolder holder;
@@ -85,6 +87,7 @@ public class SRPGView extends SurfaceView
     static int SC_ACT = 4;
     static int SC_BATTLE = 5;
     static int SC_CLEAR = 6;
+    static int SC_STATUS = 7;
     static int SC_GAMEOVER = 9;
 
     /**
@@ -110,6 +113,7 @@ public class SRPGView extends SurfaceView
         imageLake_blue =BitmapFactory.decodeResource(r, R.drawable.terrain_lake_blue);
         imageLake_red =BitmapFactory.decodeResource(r, R.drawable.terrain_lake_red);
         imageReimu = BitmapFactory.decodeResource(r, R.drawable.char_reimu);
+        imageMarisa = BitmapFactory.decodeResource(r, R.drawable.char_marisa);
         imageSakuya = BitmapFactory.decodeResource(r, R.drawable.char_sakuya);
 
         //地形情報生成
@@ -135,8 +139,9 @@ public class SRPGView extends SurfaceView
         numCellX = chapter1.getNumCellX();
         numCellY = chapter1.getNumCellY();
         //キャラクター情報生成
-        Reimu = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 5, 0, 0, imageReimu, ironSword,chapter1);
-        Sakuya = new Character(1, 20, 5, 5, 5, 5, 5, 5, 5, 5, 3, 0, imageSakuya, ironSword,chapter1);
+        Reimu = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 5, 0, 0, imageReimu, ironSword, chapter1);
+        Marisa = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 5, 6, 0, imageMarisa, ironSword, chapter1);
+        Sakuya = new Character(1, 20, 5, 5, 5, 5, 5, 5, 5, 5, 3, 0, imageSakuya, ironSword, chapter1);
 
         //セルのサイズ、原点を計算
         Display display = ((Activity)context).getWindowManager().getDefaultDisplay();
@@ -223,6 +228,15 @@ public class SRPGView extends SurfaceView
         }
     }
 
+    //キャラクター描画メソッド
+    public void drawingCharacter(Character character) {
+        canvas.drawBitmap(character.charImage, getSrc(character.charImage),
+                character.getCharDomain(originX, originY, cellSize, character.charXcoord, character.charYcoord), null);
+    }
+
+    //背景描画メソッド
+
+
     //謎のメソッド集
     public void surfaceCreated(SurfaceHolder holder) {
         thread = new Thread(this);
@@ -287,10 +301,9 @@ public class SRPGView extends SurfaceView
                                 getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
                     }
                 }
-                canvas.drawBitmap(Reimu.charImage, getSrc(Reimu.charImage),
-                        Reimu.getCharDomain(originX, originY, cellSize, Reimu.charXcoord, Reimu.charYcoord), null);
-                canvas.drawBitmap(Sakuya.charImage, getSrc(Sakuya.charImage),
-                        Sakuya.getCharDomain(originX, originY, cellSize, Sakuya.charXcoord, Sakuya.charYcoord), null);
+                drawingCharacter(Reimu);
+                drawingCharacter(Marisa);
+                drawingCharacter(Sakuya);
                 unlock();
                 sleep(600);
             }
@@ -317,10 +330,9 @@ public class SRPGView extends SurfaceView
                         }
                     }
                 }
-                canvas.drawBitmap(Reimu.charImage, getSrc(Reimu.charImage),
-                        Reimu.getCharDomain(originX, originY, cellSize, Reimu.charXcoord, Reimu.charYcoord), null);
-                canvas.drawBitmap(Sakuya.charImage, getSrc(Sakuya.charImage),
-                        Sakuya.getCharDomain(originX, originY, cellSize, Sakuya.charXcoord, Sakuya.charYcoord), null);
+                drawingCharacter(Reimu);
+                drawingCharacter(Marisa);
+                drawingCharacter(Sakuya);
                 unlock();
                 sleep(0);
             }
@@ -347,9 +359,9 @@ public class SRPGView extends SurfaceView
                                 getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
                     }
                 }
-                canvas.drawBitmap(Sakuya.charImage, getSrc(Sakuya.charImage),
-                        Sakuya.getCharDomain(originX, originY, cellSize, Sakuya.charXcoord, Sakuya.charYcoord), null);
-                canvas.drawBitmap(Reimu.charImage, getSrc(Reimu.charImage), charAnime, null);
+                drawingCharacter(Reimu);
+                drawingCharacter(Marisa);
+                drawingCharacter(Sakuya);
                 charAnime.left += dx;
                 charAnime.right += dx;
                 charAnime.top += dy;
@@ -380,10 +392,9 @@ public class SRPGView extends SurfaceView
                                 getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
                     }
                 }
-                canvas.drawBitmap(Reimu.charImage, getSrc(Reimu.charImage),
-                        Reimu.getCharDomain(originX, originY, cellSize, Reimu.charXcoord, Reimu.charYcoord), null);
-                canvas.drawBitmap(Sakuya.charImage, getSrc(Sakuya.charImage),
-                        Sakuya.getCharDomain(originX, originY, cellSize, Sakuya.charXcoord, Sakuya.charYcoord), null);
+                drawingCharacter(Reimu);
+                drawingCharacter(Marisa);
+                drawingCharacter(Sakuya);
                 if (Math.abs(Reimu.charXcoord - Sakuya.charXcoord) + Math.abs(Reimu.charYcoord - Sakuya.charYcoord) == 1) {
                     Paint paint2 = new Paint();
                     paint2.setTextSize(48);
