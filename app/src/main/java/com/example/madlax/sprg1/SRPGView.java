@@ -124,7 +124,6 @@ public class SRPGView extends SurfaceView
         //武器情報生成
         ironSword = new Weapon(5, 90, 0, 1);
 
-
         //1章情報生成
         int[][] FIELD1 = {
                 {1,0,0,0,0,0,0,0,0,0},
@@ -186,16 +185,16 @@ public class SRPGView extends SurfaceView
         character.charYcoord = idougoY;
     }
     //対象キャラクターの移動情報書き込み
-    public void judgeCell(Character character,Chapter chapter,Terrain[] terrain){
-        boolean loop=true;
+    public void judgeCell(Character character, Chapter chapter, Terrain[] terrain){
+        boolean loop = true;
         character.cell[character.getCharaX()][character.getCharaY()].tansakuzumi = true;
         character.cell[character.getCharaX()][character.getCharaY()].moveVariable = character.getMovement();
-        while(loop==true) {
+        while(loop == true) {
             loop = false;
             for (int i = 0; i < chapter.getNumCellX(); i++) {
                 for (int j = 0; j < chapter.getNumCellY(); j++) {
-                    if(character.cell[i][j].tansakuzumi==true){
-                        character.cell[i][j].writecell(i,j,character.cell,chapter,terrain,loop);
+                    if(character.cell[i][j].tansakuzumi == true){
+                        character.cell[i][j].writecell(i, j, character.cell, chapter, terrain, loop);
                     }
                 }
             }
@@ -233,9 +232,6 @@ public class SRPGView extends SurfaceView
         canvas.drawBitmap(character.charImage, getSrc(character.charImage),
                 character.getCharDomain(originX, originY, cellSize, character.charXcoord, character.charYcoord), null);
     }
-
-    //背景描画メソッド
-
 
     //謎のメソッド集
     public void surfaceCreated(SurfaceHolder holder) {
