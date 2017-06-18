@@ -127,19 +127,22 @@ public class SRPGView extends SurfaceView
 
         //1章情報生成
         int[][] FIELD1 = {
-                {1,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0},
-                {0,2,0,0,0,0,0,0,0,0},
-                {0,0,0,1,1,0,0,0,0,0},
-                {0,0,1,1,1,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0}};
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
         chapter1 = new Chapter(FIELD1);
         numCellX = chapter1.getNumCellX();
         numCellY = chapter1.getNumCellY();
         //キャラクター情報生成
-        Reimu = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 5, 0, 0, imageReimu, ironSword, chapter1);
+        Reimu = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 4, 0, 0, imageReimu, ironSword, chapter1);
         Marisa = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 5, 6, 0, imageMarisa, ironSword, chapter1);
         Sakuya = new Character(1, 20, 5, 5, 5, 5, 5, 5, 5, 5, 3, 0, imageSakuya, ironSword, chapter1);
 
@@ -192,8 +195,8 @@ public class SRPGView extends SurfaceView
         character.cell[character.getCharaX()][character.getCharaY()].moveVariable = character.getMovement();
         while(loop==true) {
             loop = false;
-            for (int i = 0; i < chapter.getNumCellX(); i++) {
-                for (int j = 0; j < chapter.getNumCellY(); j++) {
+            for (int i=0; i <chapter.getNumCellX(); i++) {
+                for (int j=0 ; j < chapter.getNumCellY(); j++) {
                     if(character.cell[i][j].tansakuzumi==true){
                         character.cell[i][j].writecell(i,j,character.cell,chapter,terrain,loop);
                     }
