@@ -71,6 +71,7 @@ public class SRPGView extends SurfaceView
     public Bitmap imageReimu;
     public Bitmap imageMarisa;
     public Bitmap imageSakuya;
+    public Bitmap imageStatus;
 
     //システム
     public SurfaceHolder holder;
@@ -115,6 +116,7 @@ public class SRPGView extends SurfaceView
         imageReimu = BitmapFactory.decodeResource(r, R.drawable.char_reimu);
         imageMarisa = BitmapFactory.decodeResource(r, R.drawable.char_marisa);
         imageSakuya = BitmapFactory.decodeResource(r, R.drawable.char_sakuya);
+        imageStatus = BitmapFactory.decodeResource(r, R.drawable.status);
 
         //地形情報生成
         terrain[0] = new Terrain(0, 1, imageFlatland,imageFlatland_blue,imageFlatland_red);
@@ -124,25 +126,21 @@ public class SRPGView extends SurfaceView
         //武器情報生成
         ironSword = new Weapon(5, 90, 0, 1);
 
-
         //1章情報生成
         int[][] FIELD1 = {
-                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                {0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                {0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
+                {1,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0},
+                {0,2,0,0,0,0,0,0,0,0},
+                {0,0,0,1,1,0,0,0,0,0},
+                {0,0,1,1,1,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0}};
         chapter1 = new Chapter(FIELD1);
         numCellX = chapter1.getNumCellX();
         numCellY = chapter1.getNumCellY();
         //キャラクター情報生成
-        Reimu = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 4, 0, 0, imageReimu, ironSword, chapter1);
+        Reimu = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 5, 0, 0, imageReimu, ironSword, chapter1);
         Marisa = new Character(1, 20, 7, 7, 7, 7, 7, 7, 7, 5, 6, 0, imageMarisa, ironSword, chapter1);
         Sakuya = new Character(1, 20, 5, 5, 5, 5, 5, 5, 5, 5, 3, 0, imageSakuya, ironSword, chapter1);
 
@@ -189,16 +187,16 @@ public class SRPGView extends SurfaceView
         character.charYcoord = idougoY;
     }
     //対象キャラクターの移動情報書き込み
-    public void judgeCell(Character character,Chapter chapter,Terrain[] terrain){
-        boolean loop=true;
+    public void judgeCell(Character character, Chapter chapter, Terrain[] terrain){
+        boolean loop = true;
         character.cell[character.getCharaX()][character.getCharaY()].tansakuzumi = true;
         character.cell[character.getCharaX()][character.getCharaY()].moveVariable = character.getMovement();
-        while(loop==true) {
+        while(loop == true) {
             loop = false;
-            for (int i=0; i <chapter.getNumCellX(); i++) {
-                for (int j=0 ; j < chapter.getNumCellY(); j++) {
-                    if(character.cell[i][j].tansakuzumi==true){
-                        character.cell[i][j].writecell(i,j,character.cell,chapter,terrain,loop);
+            for (int i = 0; i < chapter.getNumCellX(); i++) {
+                for (int j = 0; j < chapter.getNumCellY(); j++) {
+                    if(character.cell[i][j].tansakuzumi == true){
+                        character.cell[i][j].writecell(i, j, character.cell, chapter, terrain, loop);
                     }
                 }
             }
@@ -236,9 +234,6 @@ public class SRPGView extends SurfaceView
         canvas.drawBitmap(character.charImage, getSrc(character.charImage),
                 character.getCharDomain(originX, originY, cellSize, character.charXcoord, character.charYcoord), null);
     }
-
-    //背景描画メソッド
-
 
     //謎のメソッド集
     public void surfaceCreated(SurfaceHolder holder) {
@@ -476,6 +471,12 @@ public class SRPGView extends SurfaceView
                 paint.setColor(Color.BLUE);
                 paint.setTextSize(48);
                 canvas.drawText("CLEAR",80,50,paint);
+                Rect dst = new Rect();
+                dst.left = originX;
+                dst.top = originY;
+                dst.right = originX + cellSize * numCellX;
+                dst.bottom = originY + cellSize * numCellY;
+                canvas.drawBitmap(imageStatus, getSrc(imageStatus), dst, null);
                 unlock();
                 sleep(0);
                 SCENE = SC_OP;
