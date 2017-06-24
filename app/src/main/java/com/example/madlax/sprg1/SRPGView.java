@@ -15,7 +15,9 @@ import android.graphics.Paint;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import java.util.Random;
-
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 /**
  * Created by madlax on 2017/03/27.
  */
@@ -36,7 +38,7 @@ public class SRPGView extends SurfaceView
     int touchYcoord;    //タッチしたセルの座標Y
     int charXcoord;     //キャラクターの座標X
     int charYcoord;     //キャラクターの座標Y
-    int charTouchDistance=0;
+    int charTouchDistance = 0;
     Rect charAnime;
     int dx;
     int dy;
@@ -48,6 +50,7 @@ public class SRPGView extends SurfaceView
     Character Reimu;
     Character Marisa;
     Character Sakuya;
+    Character moveScheduleChar;
 
     //武器
     Weapon ironSword;
@@ -77,6 +80,8 @@ public class SRPGView extends SurfaceView
     public SurfaceHolder holder;
     public Thread thread;
     public Canvas canvas;
+    public Canvas canvasMap;
+    public Canvas canvasMOVEREADY;
 
     //シーン
     int SCENE = -1;
@@ -90,6 +95,13 @@ public class SRPGView extends SurfaceView
     static int SC_CLEAR = 6;
     static int SC_STATUS = 7;
     static int SC_GAMEOVER = 9;
+    //frag 管理
+    private boolean touchCharFlag = false;
+    private boolean chapterLoop =true;
+    private boolean OP = true;
+    private boolean MAP = false;
+    private boolean MOVEREADY = false;
+    private boolean MOVE = false;
 
     /**
      * コンストラクタ（長い）
@@ -100,6 +112,9 @@ public class SRPGView extends SurfaceView
         //generate surface holder
         holder = getHolder();
         holder.addCallback(this);
+        getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        setFocusable(true);
+        setZOrderOnTop(true);
 
         //画像の読込
         Resources r = context.getResources();   //リソースのインスタンス生成
@@ -111,31 +126,31 @@ public class SRPGView extends SurfaceView
         imageGrass_blue = BitmapFactory.decodeResource(r, R.drawable.terrain_grass_blue);
         imageGrass_red = BitmapFactory.decodeResource(r, R.drawable.terrain_grass_red);
         imageLake = BitmapFactory.decodeResource(r, R.drawable.terrain_lake);
-        imageLake_blue =BitmapFactory.decodeResource(r, R.drawable.terrain_lake_blue);
-        imageLake_red =BitmapFactory.decodeResource(r, R.drawable.terrain_lake_red);
+        imageLake_blue = BitmapFactory.decodeResource(r, R.drawable.terrain_lake_blue);
+        imageLake_red = BitmapFactory.decodeResource(r, R.drawable.terrain_lake_red);
         imageReimu = BitmapFactory.decodeResource(r, R.drawable.char_reimu);
         imageMarisa = BitmapFactory.decodeResource(r, R.drawable.char_marisa);
         imageSakuya = BitmapFactory.decodeResource(r, R.drawable.char_sakuya);
         imageStatus = BitmapFactory.decodeResource(r, R.drawable.status);
 
         //地形情報生成
-        terrain[0] = new Terrain(0, 1, imageFlatland,imageFlatland_blue,imageFlatland_red);
-        terrain[1] = new Terrain(10, 2, imageGrass,imageGrass_blue,imageGrass_red);
-        terrain[2] = new Terrain(10, 99, imageLake,imageLake_blue,imageLake_red);
+        terrain[0] = new Terrain(0, 1, imageFlatland, imageFlatland_blue, imageFlatland_red);
+        terrain[1] = new Terrain(10, 2, imageGrass, imageGrass_blue, imageGrass_red);
+        terrain[2] = new Terrain(10, 99, imageLake, imageLake_blue, imageLake_red);
 
         //武器情報生成
         ironSword = new Weapon(5, 90, 0, 1);
 
         //1章情報生成
         int[][] FIELD1 = {
-                {1,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0},
-                {0,2,0,0,0,0,0,0,0,0},
-                {0,0,0,1,1,0,0,0,0,0},
-                {0,0,1,1,1,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0,0}};
+                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 2, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
+                {0, 0, 1, 1, 1, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
         chapter1 = new Chapter(FIELD1);
         numCellX = chapter1.getNumCellX();
         numCellY = chapter1.getNumCellY();
@@ -145,7 +160,7 @@ public class SRPGView extends SurfaceView
         Sakuya = new Character(1, 20, 5, 5, 5, 5, 5, 5, 5, 5, 3, 0, imageSakuya, ironSword, chapter1);
 
         //セルのサイズ、原点を計算
-        Display display = ((Activity)context).getWindowManager().getDefaultDisplay();
+        Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
         Point p = new Point();
         display.getSize(p);
         screenWidth = p.x;
@@ -156,7 +171,7 @@ public class SRPGView extends SurfaceView
 
         //描画領域を計算
         drawingDomain = new Rect[numCellX][numCellY];
-        for(int i = 0; i < numCellX; i++) {
+        for (int i = 0; i < numCellX; i++) {
             for (int j = 0; j < numCellY; j++) {
                 drawingDomain[i][j] = new Rect();
                 drawingDomain[i][j].left = originX + i * cellSize;
@@ -179,23 +194,37 @@ public class SRPGView extends SurfaceView
     }
 
     /**
-     *　メソッド
+     * 　メソッド
      */
     //キャラクターの移動（character.javaに置くべきメソッド？）
-    public void moveChar(Character character, int idougoX, int idougoY){
+    public void moveChar(Character character, int idougoX, int idougoY) {
         character.charXcoord = idougoX;
         character.charYcoord = idougoY;
     }
+    //キャラクター座標の特定
+    public Character touchChar(int touchX,int touchY){
+        if(Reimu.getCharaX()-touchX==0&&Reimu.getCharaY()-touchY==0){
+            return Reimu;
+        }
+        else if (Sakuya.getCharaX()-touchX==0&&Sakuya.getCharaY()-touchY==0) {
+            return Sakuya;
+        }
+        else if  (Marisa.getCharaX()-touchX==0&&Marisa.getCharaY()-touchY==0)
+            return Marisa;
+        else
+            return null;
+    }
+
     //対象キャラクターの移動情報書き込み
-    public void judgeCell(Character character, Chapter chapter, Terrain[] terrain){
+    public void judgeCell(Character character, Chapter chapter, Terrain[] terrain) {
         boolean loop = true;
         character.cell[character.getCharaX()][character.getCharaY()].tansakuzumi = true;
         character.cell[character.getCharaX()][character.getCharaY()].moveVariable = character.getMovement();
-        while(loop == true) {
+        while (loop == true) {
             loop = false;
             for (int i = 0; i < chapter.getNumCellX(); i++) {
                 for (int j = 0; j < chapter.getNumCellY(); j++) {
-                    if(character.cell[i][j].tansakuzumi == true){
+                    if (character.cell[i][j].tansakuzumi == true) {
                         character.cell[i][j].writecell(i, j, character.cell, chapter, terrain, loop);
                     }
                 }
@@ -204,7 +233,7 @@ public class SRPGView extends SurfaceView
     }
 
     //画像の描画元領域の取得
-    public Rect getSrc(Bitmap bitmap){
+    public Rect getSrc(Bitmap bitmap) {
         src = new Rect();
         src.bottom = bitmap.getHeight();
         src.right = bitmap.getWidth();
@@ -218,14 +247,15 @@ public class SRPGView extends SurfaceView
     public void lock() {
         canvas = holder.lockCanvas();
     }
-    public void unlock() {
+
+    public void unlock(Canvas canvas) {
         holder.unlockCanvasAndPost(canvas);
     }
-    public void sleep(int time){//delay method
+
+    public void sleep(int time) {//delay method
         try {
             Thread.sleep(time);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
         }
     }
 
@@ -240,9 +270,12 @@ public class SRPGView extends SurfaceView
         thread = new Thread(this);
         thread.start();
     }
+
+
     public void surfaceDestroyed(SurfaceHolder holder) {
         thread = null;
     }
+
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
     }
 
@@ -250,329 +283,226 @@ public class SRPGView extends SurfaceView
      * メイン処理
      */
     public void run() {
-        while (thread != null) {
-            SCENE = NEXT_SCENE;
-            if (SCENE == SC_OP) {//todo:OP画像の表示及びBGMの実装
-                lock();
-                canvas.drawColor(Color.WHITE);
-                Paint paint = new Paint();
-                paint.setColor(Color.BLUE);
-                paint.setTextSize(48);
-                canvas.drawText("OP" + "X:" + screenWidth + "Y:" + screenHeight + "CELL:" + cellSize, 50, 50, paint);
-                Paint paint1 = new Paint();
-                paint1.setColor(Color.BLUE);
-                paint1.setTextSize(48);
-                canvas.drawText("Mapdata origin:" + drawingDomain[0][0].left + "," + drawingDomain[0][0].top, 50, 100, paint1);
-                Paint paint2 = new Paint();
-                paint2.setColor(Color.BLUE);
-                paint2.setTextSize(48);
-                canvas.drawText("touchX:" + (int)touchX + "touchY:" + (int)touchY, 50, 150, paint);
-                Paint paint3 = new Paint();
-                paint3.setColor(Color.RED);
-                paint3.setStyle(Paint.Style.STROKE);
-                for(int i = 0; i < numCellX; i++){
-                    for(int j = 0; j < numCellY; j++){
-                        canvas.drawRect(drawingDomain[i][j],paint3);
-                    }
-                }
-                Paint paint4 = new Paint();
-                paint4.setColor(Color.BLUE);
-                paint4.setTextSize(48);
-                canvas.drawText("cellX:"+ touchXcoord + "cellY:" + touchYcoord, 50, 200, paint);
-                unlock();
-                sleep(0);
+        //OP　処理
+        lock();
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        Paint paint_DefaultChar = new Paint();
+        paint_DefaultChar.setColor(Color.BLUE);
+        paint_DefaultChar.setTextSize(48);
+        canvas.drawText("OP" + "X:" + screenWidth + "Y:" + screenHeight + "CELL:" + cellSize, 50, 50, paint_DefaultChar);
+        canvas.drawText("Mapdata origin:" + drawingDomain[0][0].left + "," + drawingDomain[0][0].top, 50, 100, paint_DefaultChar);
+        canvas.drawText("touchX:" + (int) touchX + "touchY:" + (int) touchY, 50, 150, paint_DefaultChar);
+        Paint paint_CellTest = new Paint();
+        paint_CellTest.setColor(Color.RED);
+        paint_CellTest.setStyle(Paint.Style.STROKE);
+        for (int i = 0; i < numCellX; i++) {
+            for (int j = 0; j < numCellY; j++) {
+                canvas.drawRect(drawingDomain[i][j], paint_CellTest);
             }
-            if (SCENE == SC_MAP) {//todo：MAP描画の実装　キャラクター描画（カズさん担当）
-                lock();
-                canvas.drawColor(Color.WHITE);
-                Paint paint = new Paint();
-                paint.setColor(Color.BLUE);
-                paint.setTextSize(48);
-                canvas.drawText("SC_MAP", 60, 50, paint);
-                Paint paint1 = new Paint();
-                paint1.setTextSize(48);
-                canvas.drawText("Touch:"+ touchXcoord + "," + touchYcoord + "Character:"
-                        + charXcoord + "," + charYcoord, 60, 100, paint1);
-                for(int i = 0; i< numCellX; i++){
-                    for(int j = 0; j< numCellY; j++) {
-                        canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage,
-                                getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
-                    }
-                }
-                drawingCharacter(Reimu);
-                drawingCharacter(Marisa);
-                drawingCharacter(Sakuya);
-                unlock();
-                sleep(600);
-            }
-            if (SCENE == SC_MOVEREADY) {// todo:移動可能領域の取得、及び領域の描画の実装　
-                judgeCell(Reimu,chapter1,terrain);
-                lock();
-                canvas.drawColor(Color.WHITE);
-                Paint paint = new Paint();
-                paint.setColor(Color.BLUE);
-                paint.setTextSize(48);
-                canvas.drawText("MOVE_READY",70,50,paint);
-                Paint paint1 = new Paint();
-                paint1.setTextSize(48);
-                canvas.drawText("Touch:" + touchXcoord + "," + touchYcoord + "Character:"
-                        + charXcoord + "," + charYcoord, 60, 100, paint1);
-                for(int i = 0; i < numCellX; i++){
+        }
+        canvas.drawText("cellX:" + touchXcoord + "cellY:" + touchYcoord, 50, 200, paint_DefaultChar);
+        unlock(canvas);
+        canvas.drawColor(0, Mode.CLEAR);
+        while (OP == true) {
+            sleep(1000);
+        }//待機処理
 
-                    for(int j = 0; j < numCellY; j++) {
-                        canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage,
-                                getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
-                        if(Reimu.cell[i][j].moveVariable >=0){
-                            canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage_blue,
-                                    getSrc(terrain[chapter1.field[i][j]].terrainImage_blue), drawingDomain[i][j], null);
+
+        while(chapterLoop == true) {
+            //MAP処理
+            canvasMap = holder.lockCanvas();
+            canvasMap.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+
+            for (int i = 0; i < numCellX; i++) {
+                for (int j = 0; j < numCellY; j++) {
+                    canvasMap.drawBitmap(terrain[chapter1.field[i][j]].terrainImage,
+                            getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
+                }
+            }
+            canvasMap.drawText("SC_MAP", 60, 50, paint_DefaultChar);
+            canvasMap.drawText("Touch:" + touchXcoord + "," + touchYcoord + "Character:" + charXcoord + "," + charYcoord, 60, 100, paint_DefaultChar);
+            drawingCharacter(Reimu);
+            drawingCharacter(Marisa);
+            unlock(canvasMap);
+            canvasMap.drawColor(0, Mode.CLEAR);
+            while (MAP == true) {
+                sleep(10);
+            }//待機処理
+
+            //MoveReady処理
+            if(MOVEREADY ==true) {
+                canvasMOVEREADY = holder.lockCanvas();
+                canvasMOVEREADY.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                judgeCell(moveScheduleChar, chapter1, terrain);
+                canvasMap.drawText("MOVE_READY", 70, 50, paint_DefaultChar);
+                canvasMap.drawText("Touch:" + touchXcoord + "," + touchYcoord + "Character:"
+                        + charXcoord + "," + charYcoord, 60, 100, paint_DefaultChar);
+                    for (int i = 0; i < numCellX; i++) {
+                        for (int j = 0; j < numCellY; j++) {
+                            canvasMOVEREADY.drawBitmap(terrain[chapter1.field[i][j]].terrainImage,
+                                    getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
+                            if (moveScheduleChar.cell[i][j].moveVariable >= 0) {
+                                canvasMOVEREADY.drawBitmap(terrain[chapter1.field[i][j]].terrainImage_blue,
+                                        getSrc(terrain[chapter1.field[i][j]].terrainImage_blue), drawingDomain[i][j], null);
+                            }
                         }
                     }
-                }
                 drawingCharacter(Reimu);
                 drawingCharacter(Marisa);
-                drawingCharacter(Sakuya);
-                unlock();
-                sleep(0);
-            }
-            if(SCENE == SC_MOVE){
-                Reimu.resetCell(chapter1);
-                lock();
-                canvas.drawColor(Color.WHITE);
-                Paint paint = new Paint();
-                paint.setColor(Color.BLUE);
-                paint.setTextSize(48);
-                canvas.drawText("SC_MOVE",70,50,paint);
-                Paint paint1 = new Paint();
-                paint1.setTextSize(48);
-                canvas.drawText("Touch:"+ touchXcoord + "," + touchYcoord + "Character:"
-                        + charXcoord + "," + charYcoord, 60, 100, paint1);
-                Paint paint2 = new Paint();
-                paint2.setTextSize(48);
-                canvas.drawText("Anime.left:"+ charAnime.left + "," + "touch:"+","
-                        + (originX+cellSize*touchXcoord)+"SCNE:"+SCENE, 60, 150, paint2);
-
-                for(int i = 0; i < numCellX; i++){
-                    for(int j = 0; j < numCellY; j++) {
-                        canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage,
-                                getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
-                    }
+                unlock(canvasMOVEREADY);
+                while (MOVEREADY == true) {
+                    sleep(10);
                 }
-                drawingCharacter(Reimu);
-                drawingCharacter(Marisa);
-                drawingCharacter(Sakuya);
-                charAnime.left += dx;
-                charAnime.right += dx;
-                charAnime.top += dy;
-                charAnime.bottom += dy;
-                unlock();
-                if(charAnime.left == originX + cellSize * touchXcoord && charAnime.top == originY + cellSize * touchYcoord) {
-                   NEXT_SCENE = SC_ACT;
-                    moveChar(Reimu,touchXcoord,touchYcoord);
-                    canvas.drawText("Anime.left:"+ charAnime.left + "," + "touch:" + ","
-                            + (originX + cellSize * touchXcoord) + "SCNE:" + SCENE, 60, 150, paint2);
-                }
-            }
-
-            if (SCENE == SC_ACT) {
-                lock();
-                canvas.drawColor(Color.WHITE);
-                Paint paint = new Paint();
-                paint.setColor(Color.BLUE);
-                paint.setTextSize(48);
-                canvas.drawText("ACT", 80, 50, paint);
-                Paint paint1 = new Paint();
-                paint1.setTextSize(48);
-                canvas.drawText("Touch:"+ touchXcoord + "," + touchYcoord + "Character:"
-                        + charXcoord + "," + charYcoord, 60, 100, paint1);
-                for(int i = 0; i< numCellX; i++){
-                    for(int j = 0; j< numCellY; j++) {
-                        canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage,
-                                getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
-                    }
-                }
-                drawingCharacter(Reimu);
-                drawingCharacter(Marisa);
-                drawingCharacter(Sakuya);
-                if (Math.abs(Reimu.charXcoord - Sakuya.charXcoord) + Math.abs(Reimu.charYcoord - Sakuya.charYcoord) == 1) {
-                    Paint paint2 = new Paint();
-                    paint2.setTextSize(48);
-                    canvas.drawText("Attack:", 80, 150, paint2);
-                    int hit1;
-                    hit1 = Reimu.getHitRate() - Sakuya.getAvoid();
-                    int dmg1;
-                    dmg1 = Reimu.getAttackPower() - Sakuya.getDeffencePower();
-                    int crt1;
-                    crt1 = Reimu.getCritical() - Sakuya.getDodge();
-                    Paint paint3 = new Paint();
-                    paint3.setTextSize(48);
-                    canvas.drawText("Reimu    HP:" + Reimu.getHitPoint() + " HIT:" + hit1 + " DMG:" + dmg1
-                            + " CRT:" + crt1, 80, 200, paint3);
-                    int hit2;
-                    hit2 = Sakuya.getHitRate() - Reimu.getAvoid();
-                    int dmg2;
-                    dmg2 = Sakuya.getAttackPower() - Reimu.getDeffencePower();
-                    int crt2;
-                    crt2 = Sakuya.getCritical() - Reimu.getDodge();
-                    Paint paint4 = new Paint();
-                    paint4.setTextSize(48);
-                    canvas.drawText("Sakuya  HP:"+ Sakuya.getHitPoint() + " HIT:" + hit2 + " DMG:" + dmg2
-                            + " CRT:" + crt2, 80, 250, paint4);
-                }
-                unlock();
-                sleep(600);
-            }
-
-            if (SCENE == SC_BATTLE) {
-                lock();
-                Random rand = new Random();
-                Paint paint1 = new Paint();
-                canvas.drawColor(Color.WHITE);
-                paint1.setTextSize(48);
-                Paint paint2 = new Paint();
-                paint2.setTextSize(48);
-                if (Reimu.getHitRate() - Sakuya.getAvoid() >= rand.nextInt(100)) {
-                    int damage;
-                    damage = Math.max(Reimu.getAttackPower() - Sakuya.getDeffencePower(), 0);
-                    Sakuya.setHitPoint(Sakuya.getHitPoint() - damage);
-                    canvas.drawText("Reimu -> Sakuya: HIT!  Sakuya:" + Sakuya.getHitPoint(), 80, 200, paint1);
-                }
-                else{
-                    canvas.drawText("Reimu -> Sakuya: MISS! Sakuya:" + Sakuya.getHitPoint(), 80, 200, paint1);
-                }
-                if (Sakuya.getHitPoint() > 0 && Sakuya.getHitRate() - Reimu.getAvoid() >= rand.nextInt(100)) {
-                    int damage;
-                    damage = Math.max(Sakuya.getAttackPower() - Reimu.getDeffencePower(), 0);
-                    Reimu.setHitPoint(Reimu.getHitPoint() - damage);
-                    canvas.drawText("Sakuya -> Reimu: HIT!  Reimu:" + Reimu.getHitPoint(), 80, 250, paint2);
-                }
-                else{
-                    canvas.drawText("Sakuya -> Reimu: MISS! Reimu:" + Reimu.getHitPoint(), 80, 250, paint2);
-                }
-                Paint paint3 = new Paint();
-                paint3.setColor(Color.BLUE);
-                paint3.setTextSize(48);
-                canvas.drawText("BATTLE", 80, 100, paint3);
-                unlock();
-                sleep(2400);
-                if(Reimu.getHitPoint() <= 0 ) {
-                    NEXT_SCENE = SC_GAMEOVER;
-                }
-                else if(Sakuya.getHitPoint() <= 0){
-                    NEXT_SCENE = SC_CLEAR;
-                }
-                else{
-                    NEXT_SCENE = SC_MAP;
-                }
-            }
-            if (SCENE == SC_CLEAR) {
-                lock();
-                canvas.drawColor(Color.WHITE);
-                Paint paint = new Paint();
-                paint.setColor(Color.BLUE);
-                paint.setTextSize(48);
-                canvas.drawText("CLEAR",80,50,paint);
-                Rect dst = new Rect();
-                dst.left = originX;
-                dst.top = originY;
-                dst.right = originX + cellSize * numCellX;
-                dst.bottom = originY + cellSize * numCellY;
-                canvas.drawBitmap(imageStatus, getSrc(imageStatus), dst, null);
-                unlock();
-                sleep(0);
-                SCENE = SC_OP;
-            }
-            if (SCENE == SC_GAMEOVER) {
-                lock();
-                canvas.drawColor(Color.WHITE);
-                Paint paint = new Paint();
-                paint.setColor(Color.BLUE);
-                paint.setTextSize(48);
-                canvas.drawText("GAMEOVER",80,50,paint);
-                unlock();
-                sleep(0);
-                SCENE = SC_OP;
             }
         }
     }
 
+
+//
+//            if (SCENE == SC_ACT) {
+//                lock();
+//                canvas.drawColor(Color.WHITE);
+//                Paint paint = new Paint();
+//                paint.setColor(Color.BLUE);
+//                paint.setTextSize(48);
+//                canvas.drawText("ACT", 80, 50, paint);
+//                Paint paint1 = new Paint();
+//                paint1.setTextSize(48);
+//                canvas.drawText("Touch:"+ touchXcoord + "," + touchYcoord + "Character:"
+//                        + charXcoord + "," + charYcoord, 60, 100, paint1);
+//                for(int i = 0; i< numCellX; i++){
+//                    for(int j = 0; j< numCellY; j++) {
+//                        canvas.drawBitmap(terrain[chapter1.field[i][j]].terrainImage,
+//                                getSrc(terrain[chapter1.field[i][j]].terrainImage), drawingDomain[i][j], null);
+//                    }
+//                }
+//                drawingCharacter(Reimu);
+//                drawingCharacter(Marisa);
+//                drawingCharacter(Sakuya);
+//                if (Math.abs(Reimu.charXcoord - Sakuya.charXcoord) + Math.abs(Reimu.charYcoord - Sakuya.charYcoord) == 1) {
+//                    Paint paint2 = new Paint();
+//                    paint2.setTextSize(48);
+//                    canvas.drawText("Attack:", 80, 150, paint2);
+//                    int hit1;
+//                    hit1 = Reimu.getHitRate() - Sakuya.getAvoid();
+//                    int dmg1;
+//                    dmg1 = Reimu.getAttackPower() - Sakuya.getDeffencePower();
+//                    int crt1;
+//                    crt1 = Reimu.getCritical() - Sakuya.getDodge();
+//                    Paint paint3 = new Paint();
+//                    paint3.setTextSize(48);
+//                    canvas.drawText("Reimu    HP:" + Reimu.getHitPoint() + " HIT:" + hit1 + " DMG:" + dmg1
+//                            + " CRT:" + crt1, 80, 200, paint3);
+//                    int hit2;
+//                    hit2 = Sakuya.getHitRate() - Reimu.getAvoid();
+//                    int dmg2;
+//                    dmg2 = Sakuya.getAttackPower() - Reimu.getDeffencePower();
+//                    int crt2;
+//                    crt2 = Sakuya.getCritical() - Reimu.getDodge();
+//                    Paint paint4 = new Paint();
+//                    paint4.setTextSize(48);
+//                    canvas.drawText("Sakuya  HP:"+ Sakuya.getHitPoint() + " HIT:" + hit2 + " DMG:" + dmg2
+//                            + " CRT:" + crt2, 80, 250, paint4);
+//                }
+//                unlock();
+//                sleep(600);
+//            }
+//
+//            if (SCENE == SC_BATTLE) {
+//                lock();
+//                Random rand = new Random();
+//                Paint paint1 = new Paint();
+//                canvas.drawColor(Color.WHITE);
+//                paint1.setTextSize(48);
+//                Paint paint2 = new Paint();
+//                paint2.setTextSize(48);
+//                if (Reimu.getHitRate() - Sakuya.getAvoid() >= rand.nextInt(100)) {
+//                    int damage;
+//                    damage = Math.max(Reimu.getAttackPower() - Sakuya.getDeffencePower(), 0);
+//                    Sakuya.setHitPoint(Sakuya.getHitPoint() - damage);
+//                    canvas.drawText("Reimu -> Sakuya: HIT!  Sakuya:" + Sakuya.getHitPoint(), 80, 200, paint1);
+//                }
+//                else{
+//                    canvas.drawText("Reimu -> Sakuya: MISS! Sakuya:" + Sakuya.getHitPoint(), 80, 200, paint1);
+//                }
+//                if (Sakuya.getHitPoint() > 0 && Sakuya.getHitRate() - Reimu.getAvoid() >= rand.nextInt(100)) {
+//                    int damage;
+//                    damage = Math.max(Sakuya.getAttackPower() - Reimu.getDeffencePower(), 0);
+//                    Reimu.setHitPoint(Reimu.getHitPoint() - damage);
+//                    canvas.drawText("Sakuya -> Reimu: HIT!  Reimu:" + Reimu.getHitPoint(), 80, 250, paint2);
+//                }
+//                else{
+//                    canvas.drawText("Sakuya -> Reimu: MISS! Reimu:" + Reimu.getHitPoint(), 80, 250, paint2);
+//                }
+//                Paint paint3 = new Paint();
+//                paint3.setColor(Color.BLUE);
+//                paint3.setTextSize(48);
+//                canvas.drawText("BATTLE", 80, 100, paint3);
+//                unlock();
+//                sleep(2400);
+//                if(Reimu.getHitPoint() <= 0 ) {
+//                    NEXT_SCENE = SC_GAMEOVER;
+//                }
+//                else if(Sakuya.getHitPoint() <= 0){
+//                    NEXT_SCENE = SC_CLEAR;
+//                }
+//                else{
+//                    NEXT_SCENE = SC_MAP;
+//                }
+//            }
+//            if (SCENE == SC_CLEAR) {
+//                lock();
+//                canvas.drawColor(Color.WHITE);
+//                Paint paint = new Paint();
+//                paint.setColor(Color.BLUE);
+//                paint.setTextSize(48);
+//                canvas.drawText("CLEAR",80,50,paint);
+//                Rect dst = new Rect();
+//                dst.left = originX;
+//                dst.top = originY;
+//                dst.right = originX + cellSize * numCellX;
+//                dst.bottom = originY + cellSize * numCellY;
+//                canvas.drawBitmap(imageStatus, getSrc(imageStatus), dst, null);
+//                unlock();
+//                sleep(0);
+//                SCENE = SC_OP;
+//            }
+//            if (SCENE == SC_GAMEOVER) {
+//                lock();
+//                canvas.drawColor(Color.WHITE);
+//                Paint paint = new Paint();
+//                paint.setColor(Color.BLUE);
+//                paint.setTextSize(48);
+//                canvas.drawText("GAMEOVER",80,50,paint);
+//                unlock();
+//                sleep(0);
+//                SCENE = SC_OP;
+//            }
+//        }
+//    }
+
     @Override
-    public boolean onTouchEvent (MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent event) {
         //タッチ場所端末ディスプレイ座標取得
         touchX = event.getX();
         touchY = event.getY();
         //タッチ場所ゲーム座標の導出
-        if(originX < touchX && touchX < numCellX * cellSize + originX && originY < touchY
+        if (originX < touchX && touchX < numCellX * cellSize + originX && originY < touchY
                 && touchY < numCellY * cellSize + originY) {
             touchXcoord = ((int) touchX - originX) / cellSize;
             touchYcoord = ((int) touchY - originY) / cellSize;
         }
 
-        if(SCENE == SC_OP){
-            switch ( event.getAction() ) {
 
-                case MotionEvent.ACTION_DOWN:
-                    //画面がタッチされたときの動作
-
-                    NEXT_SCENE = SC_MAP;
-                    break;
-
-                case MotionEvent.ACTION_MOVE:
-                    //タッチしたまま移動したときの動作
-                    break;
-
-                case MotionEvent.ACTION_UP:
-                    //タッチが離されたときの動作
-                    break;
-
-                case MotionEvent.ACTION_CANCEL:
-                    //他の要因によってタッチがキャンセルされたときの動作
-                    break;
-
-            }
-        }
-        else if(SCENE == SC_MAP){
-            switch ( event.getAction() ) {
-
-                case MotionEvent.ACTION_DOWN:
-                    //画面がタッチされたときの動作
-                    if(charTouchDistance == 0 && originX < touchX && touchX < numCellX * cellSize
-                            + originX && originY < touchY && touchY < numCellY * cellSize + originY){
-                        NEXT_SCENE = SC_MOVEREADY;
-                    }
-                    break;
-
-                case MotionEvent.ACTION_MOVE:
-                    //タッチしたまま移動したときの動作
-                    break;
-
-                case MotionEvent.ACTION_UP:
-                    //タッチが離されたときの動作
-                    break;
-
-                case MotionEvent.ACTION_CANCEL:
-                    //他の要因によってタッチがキャンセルされたときの動作
-                    break;
-
-            }
-
-        }
-        else if(SCENE == SC_MOVEREADY) {
+        if (OP == true) {
             switch (event.getAction()) {
 
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
-                    if (Reimu.cell[touchXcoord][touchYcoord].moveVariable >= 0) {//todo:ifタッチ箇所==キャラクター
-                        charXcoord = touchXcoord;
-                        charYcoord = touchYcoord;
-                        charAnime = Reimu.getCharDomain(originX, originY, cellSize, Reimu.charXcoord, Reimu.charYcoord);
-                        dx = ((originX + cellSize * touchXcoord) - (originX + cellSize * Reimu.charXcoord));
-                        dy = ((originY + cellSize * touchYcoord) - (originY + cellSize * Reimu.charYcoord));
-                        NEXT_SCENE = SC_MOVE;
-                    }
-                    if (Reimu.cell[touchXcoord][touchYcoord].moveVariable < 0){
-                        NEXT_SCENE = SC_MAP;
-                    }
+                    OP = false;
+                    MAP = true;
                     break;
+
                 case MotionEvent.ACTION_MOVE:
                     //タッチしたまま移動したときの動作
                     break;
@@ -587,20 +517,60 @@ public class SRPGView extends SurfaceView
 
             }
         }
-        else  if (SCENE == SC_ACT){
-            switch ( event.getAction() ) {
+        else if (MAP == true) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        //画面がタッチされたときの動作
+                        if(touchChar(touchXcoord,touchYcoord)!=null){
+                            touchCharFlag = true;
+                        }
+                        if (touchCharFlag == true && originX < touchX && touchX < numCellX * cellSize
+                                + originX && originY < touchY && touchY < numCellY * cellSize + originY) {
+                            moveScheduleChar = touchChar(touchXcoord,touchYcoord);
+                            touchCharFlag = false;
+                            MAP = false;
+                            MOVEREADY = true;
+                        }
+                        else{
+                            touchCharFlag = false;
+                            moveScheduleChar = null;
+                            MAP = true;
+                        }
+                        break;
 
+                    case MotionEvent.ACTION_MOVE:
+                        //タッチしたまま移動したときの動作
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        //タッチが離されたときの動作
+                        break;
+
+                    case MotionEvent.ACTION_CANCEL:
+                        //他の要因によってタッチがキャンセルされたときの動作
+                        break;
+                }
+        }
+        else if (MOVEREADY == true){
+            switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     //画面がタッチされたときの動作
-                    if (Math.abs(Reimu.charXcoord - Sakuya.charXcoord)
-                            + Math.abs(Reimu.charYcoord - Sakuya.charYcoord) == 1) {
-                        NEXT_SCENE = SC_BATTLE;
+                    if (moveScheduleChar.cell[touchXcoord][touchYcoord].moveVariable >= 0) {
+                        moveChar(moveScheduleChar, touchXcoord, touchYcoord);
+                        moveScheduleChar.resetCell(chapter1);
+                        moveScheduleChar = null;
+                        touchCharFlag = false;
+                        MOVEREADY = false;
+                        MAP = true;
+
                     }
-                    else {
-                        NEXT_SCENE = SC_MAP;
+                    else if (moveScheduleChar.cell[touchXcoord][touchYcoord].moveVariable < 0){
+                        moveScheduleChar = null;
+                        touchCharFlag = false;
+                        MOVEREADY = false;
+                        MAP = true;
                     }
                     break;
-
                 case MotionEvent.ACTION_MOVE:
                     //タッチしたまま移動したときの動作
                     break;
@@ -614,68 +584,181 @@ public class SRPGView extends SurfaceView
                     break;
             }
         }
-        else  if (SCENE == SC_BATTLE){
-            switch ( event.getAction() ) {
 
-                case MotionEvent.ACTION_DOWN:
-                    //画面がタッチされたときの動作
-                    break;
-
-                case MotionEvent.ACTION_MOVE:
-                    //タッチしたまま移動したときの動作
-                    break;
-
-                case MotionEvent.ACTION_UP:
-                    //タッチが離されたときの動作
-                    break;
-
-                case MotionEvent.ACTION_CANCEL:
-                    //他の要因によってタッチがキャンセルされたときの動作
-                    break;
-            }
-        }
-        else if(SCENE == SC_CLEAR){
-            switch ( event.getAction() ) {
-
-                case MotionEvent.ACTION_DOWN:
-                    //画面がタッチされたときの動作
-                    NEXT_SCENE = SC_OP;
-                    break;
-
-                case MotionEvent.ACTION_MOVE:
-                    //タッチしたまま移動したときの動作
-                    break;
-
-                case MotionEvent.ACTION_UP:
-                    //タッチが離されたときの動作
-                    break;
-
-                case MotionEvent.ACTION_CANCEL:
-                    //他の要因によってタッチがキャンセルされたときの動作
-                    break;
-            }
-        }
-        else if(SCENE == SC_GAMEOVER){
-            switch ( event.getAction() ) {
-
-                case MotionEvent.ACTION_DOWN:
-                    //画面がタッチされたときの動作
-                    NEXT_SCENE = SC_OP;
-                    break;
-
-                case MotionEvent.ACTION_MOVE:
-                    //タッチしたまま移動したときの動作
-                    break;
-
-                case MotionEvent.ACTION_UP:
-                    //タッチが離されたときの動作
-                    break;
-
-                case MotionEvent.ACTION_CANCEL:
-                    //他の要因によってタッチがキャンセルされたときの動作
-                    break;
-            }
-        }
+        //todo:タッチ待ち受け　タッチによるキャラクターの移動の実装  アニメーション　SE 戦闘
         return true;
-    }//todo:タッチ待ち受け　タッチによるキャラクターの移動の実装  アニメーション　SE 戦闘
+    }
 }
+
+//
+//        if(SCENE == SC_OP){
+//            switch ( event.getAction() ) {
+//
+//                case MotionEvent.ACTION_DOWN:
+//                    //画面がタッチされたときの動作
+//
+//                    NEXT_SCENE = SC_MAP;
+//                    break;
+//
+//                case MotionEvent.ACTION_MOVE:
+//                    //タッチしたまま移動したときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_UP:
+//                    //タッチが離されたときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_CANCEL:
+//                    //他の要因によってタッチがキャンセルされたときの動作
+//                    break;
+//
+//            }
+//        }
+//        else if(SCENE == SC_MAP){
+//            switch ( event.getAction() ) {
+//
+//                case MotionEvent.ACTION_DOWN:
+//                    //画面がタッチされたときの動作
+//                    if(charTouchDistance == 0 && originX < touchX && touchX < numCellX * cellSize
+//                            + originX && originY < touchY && touchY < numCellY * cellSize + originY){
+//                        NEXT_SCENE = SC_MOVEREADY;
+//                    }
+//                    break;
+//
+//                case MotionEvent.ACTION_MOVE:
+//                    //タッチしたまま移動したときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_UP:
+//                    //タッチが離されたときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_CANCEL:
+//                    //他の要因によってタッチがキャンセルされたときの動作
+//                    break;
+//
+//            }
+//
+//        }
+//        else if(SCENE == SC_MOVEREADY) {
+//            switch (event.getAction()) {
+//
+//                case MotionEvent.ACTION_DOWN:
+//                    //画面がタッチされたときの動作
+//                    if (Reimu.cell[touchXcoord][touchYcoord].moveVariable >= 0) {//todo:ifタッチ箇所==キャラクター
+//                        charXcoord = touchXcoord;
+//                        charYcoord = touchYcoord;
+//                        charAnime = Reimu.getCharDomain(originX, originY, cellSize, Reimu.charXcoord, Reimu.charYcoord);
+//                        dx = ((originX + cellSize * touchXcoord) - (originX + cellSize * Reimu.charXcoord));
+//                        dy = ((originY + cellSize * touchYcoord) - (originY + cellSize * Reimu.charYcoord));
+//                        NEXT_SCENE = SC_MOVE;
+//                    }
+//                    if (Reimu.cell[touchXcoord][touchYcoord].moveVariable < 0){
+//                        NEXT_SCENE = SC_MAP;
+//                    }
+//                    break;
+//                case MotionEvent.ACTION_MOVE:
+//                    //タッチしたまま移動したときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_UP:
+//                    //タッチが離されたときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_CANCEL:
+//                    //他の要因によってタッチがキャンセルされたときの動作
+//                    break;
+//
+//            }
+//        }
+//        else  if (SCENE == SC_ACT){
+//            switch ( event.getAction() ) {
+//
+//                case MotionEvent.ACTION_DOWN:
+//                    //画面がタッチされたときの動作
+//                    if (Math.abs(Reimu.charXcoord - Sakuya.charXcoord)
+//                            + Math.abs(Reimu.charYcoord - Sakuya.charYcoord) == 1) {
+//                        NEXT_SCENE = SC_BATTLE;
+//                    }
+//                    else {
+//                        NEXT_SCENE = SC_MAP;
+//                    }
+//                    break;
+//
+//                case MotionEvent.ACTION_MOVE:
+//                    //タッチしたまま移動したときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_UP:
+//                    //タッチが離されたときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_CANCEL:
+//                    //他の要因によってタッチがキャンセルされたときの動作
+//                    break;
+//            }
+//        }
+//        else  if (SCENE == SC_BATTLE){
+//            switch ( event.getAction() ) {
+//
+//                case MotionEvent.ACTION_DOWN:
+//                    //画面がタッチされたときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_MOVE:
+//                    //タッチしたまま移動したときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_UP:
+//                    //タッチが離されたときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_CANCEL:
+//                    //他の要因によってタッチがキャンセルされたときの動作
+//                    break;
+//            }
+//        }
+//        else if(SCENE == SC_CLEAR){
+//            switch ( event.getAction() ) {
+//
+//                case MotionEvent.ACTION_DOWN:
+//                    //画面がタッチされたときの動作
+//                    NEXT_SCENE = SC_OP;
+//                    break;
+//
+//                case MotionEvent.ACTION_MOVE:
+//                    //タッチしたまま移動したときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_UP:
+//                    //タッチが離されたときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_CANCEL:
+//                    //他の要因によってタッチがキャンセルされたときの動作
+//                    break;
+//            }
+//        }
+//        else if(SCENE == SC_GAMEOVER){
+//            switch ( event.getAction() ) {
+//
+//                case MotionEvent.ACTION_DOWN:
+//                    //画面がタッチされたときの動作
+//                    NEXT_SCENE = SC_OP;
+//                    break;
+//
+//                case MotionEvent.ACTION_MOVE:
+//                    //タッチしたまま移動したときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_UP:
+//                    //タッチが離されたときの動作
+//                    break;
+//
+//                case MotionEvent.ACTION_CANCEL:
+//                    //他の要因によってタッチがキャンセルされたときの動作
+//                    break;
+//            }
+//        }
+//        return true;
+//    }//todo:タッチ待ち受け　タッチによるキャラクターの移動の実装  アニメーション　SE 戦闘
