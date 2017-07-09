@@ -15,6 +15,5 @@ public class SubActivity extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(new SRPGView(this));
-
     }
 }
