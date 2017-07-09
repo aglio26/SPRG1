@@ -18,6 +18,8 @@ import java.util.Random;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
+import android.os.Handler;
+
 /**
  * Created by madlax on 2017/03/27.
  */
@@ -279,6 +281,19 @@ public class SRPGView extends SurfaceView
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
     }
 
+    long LONG_PRESS_TIME = 1000;    // 長押し時間（ミリ秒）
+    Handler long_press_handler = new Handler();
+    Runnable long_press_receiver = new Runnable() {
+        @Override
+        public void run()
+        {
+            Paint paint_DefaultChar = new Paint();
+            paint_DefaultChar.setColor(Color.BLUE);
+            paint_DefaultChar.setTextSize(48);
+            canvas.drawText("OP" + "X:" + screenWidth + "Y:" + screenHeight + "TEST:" + cellSize, 50, 50, paint_DefaultChar);
+        }
+    };
+
     /**
      * メイン処理
      */
@@ -498,6 +513,7 @@ public class SRPGView extends SurfaceView
             switch (event.getAction()) {
 
                 case MotionEvent.ACTION_DOWN:
+//                    long_press_handler.postDelayed( long_press_receiver, LONG_PRESS_TIME);  // 長押し判定
                     //画面がタッチされたときの動作
                     OP = false;
                     MAP = true;
@@ -508,14 +524,15 @@ public class SRPGView extends SurfaceView
                     break;
 
                 case MotionEvent.ACTION_UP:
+                    long_press_handler.removeCallbacks( long_press_receiver );  // 長押し中に指を上げたらhandlerの処理を中止
                     //タッチが離されたときの動作
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
                     //他の要因によってタッチがキャンセルされたときの動作
                     break;
-
             }
+            return false;
         }
         else if (MAP == true) {
                 switch (event.getAction()) {
@@ -588,6 +605,7 @@ public class SRPGView extends SurfaceView
         //todo:タッチ待ち受け　タッチによるキャラクターの移動の実装  アニメーション　SE 戦闘
         return true;
     }
+
 }
 
 //
