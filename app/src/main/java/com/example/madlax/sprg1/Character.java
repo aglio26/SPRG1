@@ -16,10 +16,10 @@ public class Character {
     private int skill;      //技
     private int speed;      //速さ
     private int luck;       //幸運
-    private int defence;   //守備
+    private int defence;    //守備
     private int resistance; //魔防
     private int movement;   //移動
-    public Cell[][] cell;  //移動情報
+    public Cell[][] cell;   //移動情報
 
     int charXcoord;
     int charYcoord;
@@ -57,10 +57,10 @@ public class Character {
     public int getHitPoint(){
         return hitPoint;
     }
-    public int getCharaX(){
+    public int getXcoord(){
         return charXcoord;
     }
-    public int getCharaY(){
+    public int getYcoord(){
         return charYcoord;
     }
     public int getMovement(){return movement;}
@@ -93,6 +93,7 @@ public class Character {
     public int getDodge() {
         return luck;
     }
+
     public void setHitPoint(int hp) {
         hitPoint = hp;
     }
