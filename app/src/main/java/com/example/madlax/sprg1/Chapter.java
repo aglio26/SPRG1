@@ -12,6 +12,7 @@ public class Chapter {
     private int numCellX;  //横方向セル数
     private int numCellY;  //縦方向セル数
     int[][] field;
+    private static boolean clear; //クリアフラグ
 
     //コンストラクタ
     public Chapter(int f[][]) {
@@ -24,6 +25,7 @@ public class Chapter {
                 field[i][j] = f[i][j];
             }
         }
+        clear = false;
     }
 
     //メソッド
@@ -32,6 +34,12 @@ public class Chapter {
     }
     public int getNumCellY(){
         return numCellY;
+    }
+
+    public static boolean isClear() {return clear;}
+
+    public static void setClear(boolean t){
+        clear = t;
     }
 
 }

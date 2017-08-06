@@ -2,10 +2,12 @@ package com.example.madlax.sprg1;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Display;
@@ -205,33 +207,32 @@ public class SRPGView extends SurfaceView
     }
     //キャラクター座標の特定
     public Character touchChar(int touchX,int touchY){
-        if(Reimu.getCharaX()-touchX==0&&Reimu.getCharaY()-touchY==0){
+        if(Reimu.getXcoord()-touchX==0&&Reimu.getYcoord()-touchY==0){
             return Reimu;
         }
-        else if (Sakuya.getCharaX()-touchX==0&&Sakuya.getCharaY()-touchY==0) {
+        else if (Sakuya.getXcoord()-touchX==0&&Sakuya.getYcoord()-touchY==0) {
             return Sakuya;
         }
-        else if  (Marisa.getCharaX()-touchX==0&&Marisa.getCharaY()-touchY==0)
+        else if  (Marisa.getXcoord()-touchX==0&&Marisa.getYcoord()-touchY==0)
             return Marisa;
         else
             return null;
     }
 
     //対象キャラクターの移動情報書き込み
-    public void judgeCell(Character character, Chapter chapter, Terrain[] terrain) { //todo:改良が必要この関数のみですべての移動領域が表示されるように
-        int count = 0;
-        character.cell[character.getCharaX()][character.getCharaY()].marker = true;
-        character.cell[character.getCharaX()][character.getCharaY()].moveVariable = character.getMovement();
-        while ( count <=50) {
+    public void judgeCell(Character character, Chapter chapter, Terrain[] terrain) {
+        boolean loop = true;
+        character.cell[character.getXcoord()][character.getYcoord()].tansakuzumi = true;
+        character.cell[character.getXcoord()][character.getYcoord()].moveVariable = character.getMovement();
+        while (loop == true) {
+            loop = false;
             for (int i = 0; i < chapter.getNumCellX(); i++) {
                 for (int j = 0; j < chapter.getNumCellY(); j++) {
-                    count += character.cell[i][j].joudgeLoop;
-                    if (character.cell[i][j].marker == true) {
-                        character.cell[i][j].writecell(i, j, character.cell, chapter, terrain);
+                    if (character.cell[i][j].tansakuzumi == true) {
+                        character.cell[i][j].writecell(i, j, character.cell, chapter, terrain, loop);
                     }
                 }
             }
-            count += 1;
         }
     }
 
@@ -336,10 +337,24 @@ public class SRPGView extends SurfaceView
                 }
             }
             canvasMap.drawText("SC_MAP", 60, 50, paint_DefaultChar);
-            canvasMap.drawText("Touch:" + touchXcoord + "," + touchYcoord + "Character:" + charXcoord + "," + charYcoord, 60, 100, paint_DefaultChar);
+            canvasMap.drawText("Touch:" + touchXcoord + "," + touchYcoord + "Character:" + charXcoord
+                    + "," + charYcoord, 60, 100, paint_DefaultChar);
             drawingCharacter(Reimu);
             drawingCharacter(Marisa);
             unlock(canvasMap);
+
+            //マップクリア条件（霊夢が(0,3)に到達）（途中）
+            if (Reimu.getXcoord() == 0 && Reimu.getYcoord() == 3 ) {
+                canvasMap =holder.lockCanvas();
+                canvasMap.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                canvasMap.drawText("Clear", 60, 200, paint_DefaultChar);
+                unlock(canvasMap);
+                chapterLoop = false;
+                MAP = false;
+                MOVEREADY = false;
+                Chapter.setClear(true);
+            }
+
             canvasMap.drawColor(0, Mode.CLEAR);
             while (MAP == true) {
                 sleep(10);

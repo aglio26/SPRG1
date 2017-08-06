@@ -15,7 +15,7 @@ public class Terrain {
     Bitmap terrainImage_red;
 
     //コンストラクタ
-    public Terrain(int a, int mc, Bitmap image1,Bitmap image2,Bitmap image3) {
+    public Terrain(int a, int mc, Bitmap image1, Bitmap image2, Bitmap image3) {
         avoidance = a;
         moveCost = mc;
         terrainImage = image1;
