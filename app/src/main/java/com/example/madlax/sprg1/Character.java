@@ -21,6 +21,7 @@ public class Character {
     private int movement;   //移動
     public Cell[][] cell;  //移動情報
 
+
     int charXcoord;
     int charYcoord;
     Bitmap charImage;
