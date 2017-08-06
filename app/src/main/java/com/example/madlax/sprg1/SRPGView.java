@@ -220,19 +220,20 @@ public class SRPGView extends SurfaceView
     }
 
     //対象キャラクターの移動情報書き込み
-    public void judgeCell(Character character, Chapter chapter, Terrain[] terrain) {
-        boolean loop = true;
-        character.cell[character.getXcoord()][character.getYcoord()].tansakuzumi = true;
+    public void judgeCell(Character character, Chapter chapter, Terrain[] terrain) { //todo:改良が必要この関数のみですべての移動領域が表示されるように
+        int count = 0;
+        character.cell[character.getXcoord()][character.getYcoord()].marker = true;
         character.cell[character.getXcoord()][character.getYcoord()].moveVariable = character.getMovement();
-        while (loop == true) {
-            loop = false;
+        while ( count <=50) {
             for (int i = 0; i < chapter.getNumCellX(); i++) {
                 for (int j = 0; j < chapter.getNumCellY(); j++) {
-                    if (character.cell[i][j].tansakuzumi == true) {
-                        character.cell[i][j].writecell(i, j, character.cell, chapter, terrain, loop);
+                    count += character.cell[i][j].joudgeLoop;
+                    if (character.cell[i][j].marker == true) {
+                        character.cell[i][j].writecell(i, j, character.cell, chapter, terrain);
                     }
                 }
             }
+            count += 1;
         }
     }
 
